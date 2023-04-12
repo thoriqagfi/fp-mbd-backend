@@ -2,7 +2,7 @@ package repository
 
 import (
 	"context"
-	"oprec/FP-MBD/entity"
+	"oprec/entity"
 
 	"gorm.io/gorm"
 )
