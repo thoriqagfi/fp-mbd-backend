@@ -2,12 +2,12 @@ package main
 
 import (
 	"log"
-	"oprec/FP-MBD/config"
-	"oprec/FP-MBD/controller"
-	"oprec/FP-MBD/middleware"
-	"oprec/FP-MBD/repository"
-	"oprec/FP-MBD/routes"
-	"oprec/FP-MBD/service"
+	"oprec/config"
+	"oprec/controller"
+	"oprec/middleware"
+	"oprec/repository"
+	"oprec/routes"
+	"oprec/service"
 	"os"
 
 	"github.com/gin-gonic/gin"
