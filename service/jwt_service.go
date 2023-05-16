@@ -19,7 +19,7 @@ type JWTService interface {
 
 type jwtCustomClaim struct {
 	ID   uint64 `json:"id"`
-	Name string `json:"name"`
+	Role string `json:"role"`
 	jwt.RegisteredClaims
 }
 
