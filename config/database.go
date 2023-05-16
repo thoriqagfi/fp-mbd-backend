@@ -2,7 +2,7 @@ package config
 
 import (
 	"fmt"
-	"oprec/FP-MBD/entity"
+	"oprec/entity"
 	"os"
 
 	"github.com/joho/godotenv"

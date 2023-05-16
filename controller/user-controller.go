@@ -2,9 +2,9 @@ package controller
 
 import (
 	"net/http"
-	"oprec/FP-MBD/dto"
-	"oprec/FP-MBD/service"
-	"oprec/FP-MBD/utils"
+	"oprec/dto"
+	"oprec/service"
+	"oprec/utils"
 
 	"github.com/gin-gonic/gin"
 )
