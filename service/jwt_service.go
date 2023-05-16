@@ -14,7 +14,7 @@ type JWTService interface {
 	GenerateToken(id uint64, name string) string
 	ValidateToken(token string) (*jwt.Token, error)
 	GetUserIDByToken(token string) (uint64, error)
-	GetNameByToken(token string) (string, error)
+	GetRoleByToken(token string) (string, error)
 }
 
 type jwtCustomClaim struct {
@@ -81,12 +81,12 @@ func (j *jwtService) GetUserIDByToken(token string) (uint64, error) {
 	return userID, nil
 }
 
-func (j *jwtService) GetNameByToken(token string) (string, error) {
+func (j *jwtService) GetRoleByToken(token string) (string, error) {
 	t_Token, err := j.ValidateToken(token)
 	if err != nil {
 		return "", err
 	}
 	claims := t_Token.Claims.(jwt.MapClaims)
-	username := fmt.Sprintf("%v", claims["name"])
-	return username, nil
+	role := fmt.Sprintf("%v", claims["role"])
+	return role, nil
 }

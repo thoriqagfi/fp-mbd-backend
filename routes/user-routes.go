@@ -12,6 +12,7 @@ func UserRouter(router *gin.Engine, userController controller.UserController, jw
 	{
 		userRoutes.POST("", userController.RegisterUser)
 		userRoutes.POST("/login", userController.LoginUser)
+		// userRoutes.GET("/profile", userController.Profile)
 	}
 
 }
