@@ -1,7 +1,7 @@
 package entity
 
 import (
-	"oprec/utils"
+	"oprec/FP-MBD/utils"
 
 	"gorm.io/gorm"
 )

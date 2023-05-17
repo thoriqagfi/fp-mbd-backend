@@ -2,10 +2,10 @@ package service
 
 import (
 	"context"
-	"oprec/dto"
-	"oprec/entity"
-	"oprec/repository"
-	"oprec/utils"
+	"oprec/FP-MBD/dto"
+	"oprec/FP-MBD/entity"
+	"oprec/FP-MBD/repository"
+	"oprec/FP-MBD/utils"
 
 	"github.com/mashingan/smapping"
 )

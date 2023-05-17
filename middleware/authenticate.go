@@ -2,8 +2,8 @@ package middleware
 
 import (
 	"net/http"
-	"oprec/service"
-	"oprec/utils"
+	"oprec/FP-MBD/service"
+	"oprec/FP-MBD/utils"
 
 	"strings"
 

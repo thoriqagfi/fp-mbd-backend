@@ -1,8 +1,8 @@
 package routes
 
 import (
-	"oprec/controller"
-	"oprec/service"
+	"oprec/FP-MBD/controller"
+	"oprec/FP-MBD/service"
 
 	"github.com/gin-gonic/gin"
 )
