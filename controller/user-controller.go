@@ -1,10 +1,10 @@
 package controller
 
 import (
+	"mods/dto"
+	"mods/service"
+	"mods/utils"
 	"net/http"
-	"oprec/FP-MBD/dto"
-	"oprec/FP-MBD/service"
-	"oprec/FP-MBD/utils"
 
 	"github.com/gin-gonic/gin"
 )

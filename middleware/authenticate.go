@@ -1,9 +1,9 @@
 package middleware
 
 import (
+	"mods/service"
+	"mods/utils"
 	"net/http"
-	"oprec/FP-MBD/service"
-	"oprec/FP-MBD/utils"
 
 	"strings"
 

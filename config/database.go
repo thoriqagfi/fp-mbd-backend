@@ -2,7 +2,7 @@ package config
 
 import (
 	"fmt"
-	"oprec/FP-MBD/entity"
+	"mods/entity"
 	"os"
 
 	"github.com/joho/godotenv"
@@ -38,6 +38,7 @@ func SetupDatabaseConnection() *gorm.DB {
 		entity.DLC{},
 		entity.Review{},
 		entity.Transaksi{},
+		entity.Tags{},
 	); err != nil {
 		fmt.Println(err)
 		panic(err)
