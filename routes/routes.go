@@ -1,18 +1,23 @@
 package routes
 
 import (
-	"oprec/controller"
-	"oprec/service"
+	"mods/controller"
+	"mods/service"
 
 	"github.com/gin-gonic/gin"
 )
 
-func UserRouter(router *gin.Engine, userController controller.UserController, jwtService service.JWTService) {
+func Routes(router *gin.Engine, userController controller.UserController, storeController controller.StoreController, jwtService service.JWTService) {
 	userRoutes := router.Group("/user")
 	{
 		userRoutes.POST("", userController.RegisterUser)
 		userRoutes.POST("/login", userController.LoginUser)
-		// userRoutes.GET("/profile", userController.Profile)
+	}
+
+	storeMainPage := router.Group("/storeMainPage")
+	{
+		storeMainPage.GET("/featured", storeController.Featured)
+		storeMainPage.GET("/categories", storeController.Categories)
 	}
 
 }

@@ -2,7 +2,7 @@ package repository
 
 import (
 	"context"
-	"oprec/entity"
+	"mods/entity"
 
 	"gorm.io/gorm"
 )
