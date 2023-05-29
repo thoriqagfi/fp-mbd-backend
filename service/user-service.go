@@ -2,10 +2,10 @@ package service
 
 import (
 	"context"
-	"oprec/dto"
-	"oprec/entity"
-	"oprec/repository"
-	"oprec/utils"
+	"mods/dto"
+	"mods/entity"
+	"mods/repository"
+	"mods/utils"
 
 	"github.com/mashingan/smapping"
 )
