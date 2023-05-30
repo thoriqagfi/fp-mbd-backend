@@ -17,3 +17,7 @@ type DLC struct {
 	GameID uint64 `gorm:"foreignKey" json:"game_id"`
 	Game   *Game  `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;" json:"game,omitempty"`
 }
+
+func (DLC) TableName() string {
+	return "dlc"
+}

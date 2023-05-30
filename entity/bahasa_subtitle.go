@@ -6,3 +6,7 @@ type BahasaSubtitle struct {
 
 	ListGame []*Game `gorm:"many2many:detail_game_bs;" json:"list_game,omitempty"`
 }
+
+func (BahasaSubtitle) TableName() string {
+	return "bahasa_subtitle"
+}

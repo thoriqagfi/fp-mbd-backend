@@ -6,3 +6,7 @@ type BahasaInterface struct {
 
 	ListGame []*Game `gorm:"many2many:detail_game_bi;" json:"list_game,omitempty"`
 }
+
+func (BahasaInterface) TableName() string {
+	return "bahasa_interface"
+}

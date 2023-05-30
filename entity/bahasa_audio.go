@@ -6,3 +6,7 @@ type BahasaAudio struct {
 
 	ListGame []*Game `gorm:"many2many:detail_game_ba;" json:"list_game,omitempty"`
 }
+
+func (BahasaAudio) TableName() string {
+	return "bahasa_audio"
+}

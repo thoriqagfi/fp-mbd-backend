@@ -6,3 +6,7 @@ type Tags struct {
 
 	ListGame []*Game `gorm:"many2many:detail_tag_game;" json:"list_game,omitempty"`
 }
+
+func (Tags) TableName() string {
+	return "tags"
+}

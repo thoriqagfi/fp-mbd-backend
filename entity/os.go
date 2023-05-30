@@ -6,3 +6,7 @@ type OperatingSystem struct {
 
 	ListGame []*Game `gorm:"many2many:detail_game_os;" json:"list_game,omitempty"`
 }
+
+func (OperatingSystem) TableName() string {
+	return "os"
+}
