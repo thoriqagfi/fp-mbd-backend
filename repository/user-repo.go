@@ -53,7 +53,7 @@ func (db *userConnection) GetUserByEmail(ctx context.Context, email string) (ent
 
 func (db *userConnection) UploadGame(ctx context.Context, gameDTO dto.UploadGame, userid uint64) (entity.Game, error) {
 	var developer entity.User
-	getDev := db.connection.Where("user_id = ?", userid).Take(&developer)
+	getDev := db.connection.Where("id = ?", userid).Take(&developer)
 	if getDev.Error != nil {
 		return entity.Game{}, errors.New("invalid user validation")
 	}
