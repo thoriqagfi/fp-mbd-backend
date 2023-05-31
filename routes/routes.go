@@ -12,6 +12,7 @@ func Routes(router *gin.Engine, userController controller.UserController, storeC
 	{
 		userRoutes.POST("", userController.RegisterUser)
 		userRoutes.POST("/login", userController.LoginUser)
+		userRoutes.POST("/upload", userController.UploadGame)
 	}
 
 	storeMainPage := router.Group("/storeMainPage")
