@@ -73,7 +73,7 @@ func (r *storeRepository) CategoriesInfo(ctx context.Context) ([]dto.StoreCatego
 func (r *storeRepository) GamePage(ctx context.Context, gameid uint64) (entity.Game, error) {
 	var game entity.Game
 
-	getGame := r.db.Where("id = ?", gameid).Find(&game) // ambil semua data tag dahulu
+	getGame := r.db.Where("id = ?", gameid).Preload("ListDLC").Find(&game) // ambil semua data tag dahulu
 	if getGame.Error != nil {
 		return entity.Game{}, errors.New("failed to get game information")
 	}
