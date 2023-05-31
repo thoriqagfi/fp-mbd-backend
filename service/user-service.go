@@ -19,6 +19,7 @@ type UserService interface {
 	IsDuplicateEmail(ctx context.Context, email string) (bool, error)
 	VerifyCredential(ctx context.Context, email string, password string) (bool, error)
 	GetUserByEmail(ctx context.Context, email string) (entity.User, error)
+	UploadGame(ctx context.Context, gameDTO dto.UploadGame, userid uint64) (entity.Game, error)
 }
 
 func NewUserService(ur repository.UserRepository) UserService {
@@ -67,4 +68,8 @@ func (us *userService) VerifyCredential(ctx context.Context, email string, passw
 
 func (us *userService) GetUserByEmail(ctx context.Context, email string) (entity.User, error) {
 	return us.userRepository.GetUserByEmail(ctx, email)
+}
+
+func (us *userService) UploadGame(ctx context.Context, gameDTO dto.UploadGame, userid uint64) (entity.Game, error) {
+	return us.userRepository.UploadGame(ctx, gameDTO, userid)
 }

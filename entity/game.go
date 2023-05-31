@@ -14,6 +14,9 @@ type Game struct {
 	Picture      string    `json:"picture" binding:"required"`
 	Video        string    `json:"video" binding:"required"`
 
+	Developer string `gorm:"foreignKey" json:"developer_id"`
+	User      *User  `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;" json:"developer,omitempty"`
+
 	ListUser      []*User            `gorm:"many2many:detail_user_game;" json:"list_user,omitempty"`
 	ListTransaksi []*Transaksi       `gorm:"many2many:detail_transaksi_game;" json:"list_transaksi,omitempty"`
 	ListTag       []*Tags            `gorm:"many2many:detail_tag_game;" json:"tags,omitempty"`
