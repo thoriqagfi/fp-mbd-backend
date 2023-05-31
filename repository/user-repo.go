@@ -116,7 +116,14 @@ func (db *userConnection) PurchaseGame(ctx context.Context, gameID uint64, userI
 
 	db.connection.Model(&user).Where(entity.User{ID: userID}).Update("wallet", (user.Wallet)-game.Harga)
 
-	db.connection.Model(&user).Association("ListGames").Append(&game)
+	newDetail := entity.DetailUserGame{
+		UserID: userID,
+		GameID: game.ID,
+	}
+
+	db.connection.Debug().Create(&newDetail)
+
+	db.connection.Model(&user).Association("ListGame").Append(&game)
 
 	return game, nil
 
