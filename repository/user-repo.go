@@ -19,7 +19,11 @@ type UserRepository interface {
 	InsertUser(ctx context.Context, user entity.User) (entity.User, error)
 	GetUserByID(ctx context.Context, userID uint64) (entity.User, error)
 	GetUserByEmail(ctx context.Context, email string) (entity.User, error)
+
+	// after login
+	PurchaseGame(ctx context.Context, gameID uint64, userID uint64) (entity.Game, error)
 	UploadGame(ctx context.Context, gameDTO dto.UploadGame, userid uint64) (entity.Game, error)
+	UserProfile(ctx context.Context, userid uint64) (entity.User, error)
 }
 
 func NewUserRepository(db *gorm.DB) UserRepository {
@@ -51,6 +55,15 @@ func (db *userConnection) GetUserByEmail(ctx context.Context, email string) (ent
 	return user, nil
 }
 
+func (db *userConnection) UserProfile(ctx context.Context, userid uint64) (entity.User, error) {
+	var user entity.User
+	getDetails := db.connection.Where("id = ?", userid).Preload("ListGame").Preload("ListDLC").Preload("ListTransaksi").Preload("ListReview").Take(&user)
+	if getDetails.Error != nil {
+		return entity.User{}, errors.New("failed to get user profile")
+	}
+	return user, nil
+}
+
 func (db *userConnection) UploadGame(ctx context.Context, gameDTO dto.UploadGame, userid uint64) (entity.Game, error) {
 	var developer entity.User
 	getDev := db.connection.Where("id = ?", userid).Take(&developer)
@@ -76,4 +89,35 @@ func (db *userConnection) UploadGame(ctx context.Context, gameDTO dto.UploadGame
 	}
 
 	return newGame, nil
+}
+
+func (db *userConnection) PurchaseGame(ctx context.Context, gameID uint64, userID uint64) (entity.Game, error) {
+	var user entity.User
+	getUser := db.connection.Where("id = ?", userID).Take(&user)
+	if getUser.Error != nil {
+		return entity.Game{}, errors.New("invalid user")
+	}
+
+	var game entity.Game
+	getGame := db.connection.Where("id = ?", gameID).Take(&game)
+	if getGame.Error != nil {
+		return entity.Game{}, errors.New("game not found")
+	}
+
+	var detail entity.DetailUserGame
+	getDetail := db.connection.Where("user_id = ? AND game_id = ?", userID, gameID).Take(&detail)
+	if getDetail.Error == nil {
+		return entity.Game{}, errors.New("game already exist in library")
+	}
+
+	if user.Wallet < game.Harga {
+		return entity.Game{}, errors.New("not enough steam wallet")
+	}
+
+	db.connection.Model(&user).Where(entity.User{ID: userID}).Update("wallet", (user.Wallet)-game.Harga)
+
+	db.connection.Model(&user).Association("ListGames").Append(&game)
+
+	return game, nil
+
 }

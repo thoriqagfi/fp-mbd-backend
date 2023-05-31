@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"mods/dto"
+	"mods/entity"
 	"mods/repository"
 )
 
@@ -13,6 +14,7 @@ type storeService struct {
 type StoreService interface {
 	GetFeatured(ctx context.Context) ([]dto.StoreFeatured, error)
 	GetCategories(ctx context.Context) ([]dto.StoreCategories, error)
+	GamePage(ctx context.Context, gameid uint64) (entity.Game, error)
 }
 
 func NewStoreService(sr repository.StoreRepository) StoreService {
@@ -37,4 +39,8 @@ func (ss *storeService) GetCategories(ctx context.Context) ([]dto.StoreCategorie
 	}
 
 	return getCategories, nil
+}
+
+func (ss *storeService) GamePage(ctx context.Context, gameid uint64) (entity.Game, error) {
+	return ss.storeRepository.GamePage(ctx, gameid)
 }

@@ -20,6 +20,8 @@ type UserService interface {
 	VerifyCredential(ctx context.Context, email string, password string) (bool, error)
 	GetUserByEmail(ctx context.Context, email string) (entity.User, error)
 	UploadGame(ctx context.Context, gameDTO dto.UploadGame, userid uint64) (entity.Game, error)
+	PurchaseGame(ctx context.Context, gameid uint64, userid uint64) (entity.Game, error)
+	UserProfile(ctx context.Context, userid uint64) (entity.User, error)
 }
 
 func NewUserService(ur repository.UserRepository) UserService {
@@ -72,4 +74,12 @@ func (us *userService) GetUserByEmail(ctx context.Context, email string) (entity
 
 func (us *userService) UploadGame(ctx context.Context, gameDTO dto.UploadGame, userid uint64) (entity.Game, error) {
 	return us.userRepository.UploadGame(ctx, gameDTO, userid)
+}
+
+func (us *userService) PurchaseGame(ctx context.Context, gameid uint64, userid uint64) (entity.Game, error) {
+	return us.userRepository.PurchaseGame(ctx, gameid, userid)
+}
+
+func (us *userService) UserProfile(ctx context.Context, userid uint64) (entity.User, error) {
+	return us.userRepository.UserProfile(ctx, userid)
 }

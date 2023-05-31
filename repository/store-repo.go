@@ -17,6 +17,8 @@ type StoreRepository interface {
 	// functional
 	FeaturedInfo(ctx context.Context) ([]dto.StoreFeatured, error)
 	CategoriesInfo(ctx context.Context) ([]dto.StoreCategories, error)
+
+	GamePage(ctx context.Context, gameid uint64) (entity.Game, error)
 }
 
 func NewStoreRepository(db *gorm.DB) StoreRepository {
@@ -66,4 +68,15 @@ func (r *storeRepository) CategoriesInfo(ctx context.Context) ([]dto.StoreCatego
 
 	return listCategories, nil
 
+}
+
+func (r *storeRepository) GamePage(ctx context.Context, gameid uint64) (entity.Game, error) {
+	var game entity.Game
+
+	getGame := r.db.Where("id = ?", gameid).Find(&game) // ambil semua data tag dahulu
+	if getGame.Error != nil {
+		return entity.Game{}, errors.New("failed to get game information")
+	}
+
+	return game, nil
 }

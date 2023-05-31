@@ -5,6 +5,7 @@ import (
 	"mods/service"
 	"mods/utils"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -18,7 +19,11 @@ type userController struct {
 type UserController interface {
 	RegisterUser(ctx *gin.Context)
 	LoginUser(ctx *gin.Context)
+
+	// after login
 	UploadGame(ctx *gin.Context)
+	PurchaseGame(ctx *gin.Context)
+	ProfilePage(ctx *gin.Context)
 }
 
 func NewUserController(us service.UserService, jwt service.JWTService) UserController {
@@ -111,3 +116,58 @@ func (uc *userController) UploadGame(ctx *gin.Context) {
 	response := utils.BuildResponse("upload game berhasil", http.StatusOK, res)
 	ctx.JSON(http.StatusCreated, response)
 }
+
+func (uc *userController) PurchaseGame(ctx *gin.Context) {
+	gameid, err := strconv.ParseUint(ctx.Param("id"), 10, 64)
+	if err != nil {
+		response := utils.BuildErrorResponse("gagal memproses request", http.StatusBadRequest)
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, response)
+		return
+	}
+
+	token := ctx.GetHeader("Authorization")
+	token = strings.Replace(token, "Bearer ", "", -1)
+	tokenService := service.NewJWTService()
+
+	idUser, err := tokenService.GetUserIDByToken(token)
+	if err != nil {
+		response := utils.BuildErrorResponse("gagal memproses request", http.StatusBadRequest)
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, response)
+		return
+	}
+
+	res, err := uc.userService.PurchaseGame(ctx, gameid, idUser)
+	if err != nil {
+		res := utils.BuildErrorResponse(err.Error(), http.StatusBadRequest)
+		ctx.JSON(http.StatusBadRequest, res)
+		return
+	}
+
+	response := utils.BuildResponse("pembelian game berhasil", http.StatusOK, res)
+	ctx.JSON(http.StatusCreated, response)
+}
+
+func (uc *userController) ProfilePage(ctx *gin.Context) {
+	token := ctx.GetHeader("Authorization")
+	token = strings.Replace(token, "Bearer ", "", -1)
+	tokenService := service.NewJWTService()
+
+	idUser, err := tokenService.GetUserIDByToken(token)
+	if err != nil {
+		response := utils.BuildErrorResponse("gagal memproses request", http.StatusBadRequest)
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, response)
+		return
+	}
+
+	res, err := uc.userService.UserProfile(ctx, idUser)
+	if err != nil {
+		res := utils.BuildErrorResponse(err.Error(), http.StatusBadRequest)
+		ctx.JSON(http.StatusBadRequest, res)
+		return
+	}
+
+	response := utils.BuildResponse("success to get profile", http.StatusOK, res)
+	ctx.JSON(http.StatusCreated, response)
+}
+
+// 1000, 5000, 10000, 20000, 50000, 100000
