@@ -17,6 +17,7 @@ type StoreService interface {
 	GetCategories(ctx context.Context) ([]dto.StoreCategories, error)
 	GamePage(ctx context.Context, gameid uint64) (entity.Game, error)
 	AllGame(ctx context.Context, pagination utils.Pagination) ([]entity.Game, error)
+	DLCGame(ctx context.Context, dlcid uint64) (entity.DLC, error)
 }
 
 func NewStoreService(sr repository.StoreRepository) StoreService {
@@ -49,4 +50,8 @@ func (ss *storeService) GamePage(ctx context.Context, gameid uint64) (entity.Gam
 
 func (ss *storeService) AllGame(ctx context.Context, pagination utils.Pagination) ([]entity.Game, error) {
 	return ss.storeRepository.AllGame(ctx, pagination)
+}
+
+func (ss *storeService) DLCGame(ctx context.Context, dlcid uint64) (entity.DLC, error) {
+	return ss.storeRepository.DLCGame(ctx, dlcid)
 }

@@ -20,6 +20,7 @@ type StoreRepository interface {
 	CategoriesInfo(ctx context.Context) ([]dto.StoreCategories, error)
 	AllGame(ctx context.Context, pagination utils.Pagination) ([]entity.Game, error)
 	GamePage(ctx context.Context, gameid uint64) (entity.Game, error)
+	DLCGame(ctx context.Context, dlcid uint64) (entity.DLC, error)
 }
 
 func NewStoreRepository(db *gorm.DB) StoreRepository {
@@ -96,4 +97,15 @@ func (r *storeRepository) GamePage(ctx context.Context, gameid uint64) (entity.G
 	}
 
 	return game, nil
+}
+
+func (r *storeRepository) DLCGame(ctx context.Context, dlcid uint64) (entity.DLC, error) {
+	var dlc entity.DLC
+
+	getDLC := r.db.Where("id = ?", dlcid).Find(&dlc) // ambil semua data tag dahulu
+	if(getDLC.Error != nil){
+		return entity.DLC{}, errors.New("failed to get dlc information")
+	}
+
+	return dlc, nil
 }

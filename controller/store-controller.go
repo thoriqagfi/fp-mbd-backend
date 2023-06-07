@@ -18,6 +18,7 @@ type StoreController interface {
 	Categories(ctx *gin.Context)
 	GamePage(ctx *gin.Context)
 	GetAllGames(ctx *gin.Context)
+	DLCGame(ctx *gin.Context)
 }
 
 func NewStoreController(ss service.StoreService) StoreController {
@@ -79,5 +80,24 @@ func (sc *storeController) GamePage(ctx *gin.Context) {
 	}
 
 	res := utils.BuildResponse("success to get game info", http.StatusOK, gameInfo)
+	ctx.JSON(http.StatusOK, res)
+}
+
+func (sc *storeController) DLCGame(ctx *gin.Context) {
+	dlcid, err := strconv.ParseUint(ctx.Param("id"), 10, 64)
+	if err != nil {
+		response := utils.BuildErrorResponse("gagal memproses request", http.StatusBadRequest)
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, response)
+		return
+	}
+
+	dlcInfo, err := sc.storeService.DLCGame(ctx, dlcid)
+	if err != nil {
+		res := utils.BuildErrorResponse("failed to get categories info", http.StatusBadRequest)
+		ctx.JSON(http.StatusBadRequest, res)
+		return
+	}
+
+	res := utils.BuildResponse("success to get game info", http.StatusOK, dlcInfo)
 	ctx.JSON(http.StatusOK, res)
 }
