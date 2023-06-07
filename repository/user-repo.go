@@ -105,7 +105,7 @@ func (db *userConnection) PurchaseGame(ctx context.Context, gameID uint64, userI
 	}
 
 	var detail entity.DetailUserGame
-	getDetail := db.connection.Debug().Model(&detail).Where("user_id = ? AND game_id = ?", userID, gameID).Take(&detail)
+	getDetail := db.connection.Debug().Where("user_id = ? AND game_id = ?", userID, gameID).Take(&detail)
 	if getDetail.Error == nil {
 		return entity.Game{}, errors.New("game already exist in library")
 	}
