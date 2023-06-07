@@ -118,6 +118,13 @@ func (uc *userController) UploadGame(ctx *gin.Context) {
 }
 
 func (uc *userController) PurchaseGame(ctx *gin.Context) {
+	var transaksi dto.PurchaseGame
+	if tx := ctx.ShouldBind(&transaksi); tx != nil {
+		res := utils.BuildErrorResponse("Failed to process request", http.StatusBadRequest)
+		ctx.JSON(http.StatusBadRequest, res)
+		return
+	}
+
 	gameid, err := strconv.ParseUint(ctx.Param("id"), 10, 64)
 	if err != nil {
 		response := utils.BuildErrorResponse("gagal memproses request", http.StatusBadRequest)
@@ -136,7 +143,7 @@ func (uc *userController) PurchaseGame(ctx *gin.Context) {
 		return
 	}
 
-	res, err := uc.userService.PurchaseGame(ctx, gameid, idUser)
+	res, err := uc.userService.PurchaseGame(ctx, gameid, idUser, transaksi.MetodeBayar)
 	if err != nil {
 		res := utils.BuildErrorResponse(err.Error(), http.StatusBadRequest)
 		ctx.JSON(http.StatusBadRequest, res)

@@ -22,3 +22,7 @@ type UploadGame struct {
 	Picture    string `json:"picture" binding:"required"`
 	Video      string `json:"video" binding:"required"`
 }
+
+type PurchaseGame struct {
+	MetodeBayar string `json:"metode_bayar"`
+}

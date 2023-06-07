@@ -21,7 +21,7 @@ type UserRepository interface {
 	GetUserByEmail(ctx context.Context, email string) (entity.User, error)
 
 	// after login
-	PurchaseGame(ctx context.Context, gameID uint64, userID uint64) (entity.Game, error)
+	PurchaseGame(ctx context.Context, gameID uint64, userID uint64, metodeBayar string) (entity.Game, error)
 	UploadGame(ctx context.Context, gameDTO dto.UploadGame, userid uint64) (entity.Game, error)
 	UserProfile(ctx context.Context, userid uint64) (entity.User, error)
 }
@@ -91,7 +91,7 @@ func (db *userConnection) UploadGame(ctx context.Context, gameDTO dto.UploadGame
 	return newGame, nil
 }
 
-func (db *userConnection) PurchaseGame(ctx context.Context, gameID uint64, userID uint64) (entity.Game, error) {
+func (db *userConnection) PurchaseGame(ctx context.Context, gameID uint64, userID uint64, metodeBayar string) (entity.Game, error) {
 	var user entity.User
 	getUser := db.connection.Where("id = ?", userID).Take(&user)
 	if getUser.Error != nil {
@@ -110,8 +110,10 @@ func (db *userConnection) PurchaseGame(ctx context.Context, gameID uint64, userI
 		return entity.Game{}, errors.New("game already exist in library")
 	}
 
-	if user.Wallet < game.Harga {
-		return entity.Game{}, errors.New("not enough steam wallet")
+	if metodeBayar == "Steam Wallet" {
+		if user.Wallet < game.Harga {
+			return entity.Game{}, errors.New("not enough steam wallet")
+		}
 	}
 
 	db.connection.Model(&user).Where(entity.User{ID: userID}).Update("wallet", (user.Wallet)-game.Harga)
