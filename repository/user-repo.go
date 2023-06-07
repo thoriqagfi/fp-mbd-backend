@@ -165,10 +165,9 @@ func (db *userConnection) DeveloperProfile(ctx context.Context, devid uint64) (d
 
 	for _, game := range games {
 		dev_releases.ListGames = append(dev_releases.ListGames, game)
-		for _, dlc := range game.ListDLC {
-			db.connection.Where("game_id = ?", game.ID).Take(&dlc)
-			dev_releases.ListDLC = append(dev_releases.ListDLC, dlc)
-		}
+		var listDLC []entity.DLC
+		db.connection.Model(&entity.DLC{}).Where("game_id = ?", game.ID).Find(&listDLC)
+		dev_releases.ListDLC = append(dev_releases.ListDLC, listDLC...)
 	}
 
 	db.connection.Preload("ListGames").Preload("ListDLC").Take(&dev_releases)
