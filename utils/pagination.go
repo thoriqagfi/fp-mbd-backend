@@ -15,7 +15,7 @@ type Pagination struct {
 func GeneratePaginationFromRequest(c *gin.Context) Pagination {
 	limit := 2
 	page := 1
-	sort := "release_date asc"
+	sort := ""
 	query := c.Request.URL.Query()
 	for key, value := range query {
 		queryValue := value[len(value)-1]
