@@ -24,6 +24,7 @@ type UserRepository interface {
 	PurchaseGame(ctx context.Context, gameID uint64, userID uint64, metodeBayar string) (entity.Game, error)
 	UploadGame(ctx context.Context, gameDTO dto.UploadGame, userid uint64) (entity.Game, error)
 	UserProfile(ctx context.Context, userid uint64) (entity.User, error)
+	TopUp(ctx context.Context, userid uint64, nominal uint64) (entity.User, error)
 }
 
 func NewUserRepository(db *gorm.DB) UserRepository {
@@ -117,6 +118,14 @@ func (db *userConnection) PurchaseGame(ctx context.Context, gameID uint64, userI
 		db.connection.Model(&user).Where(entity.User{ID: userID}).Update("wallet", (user.Wallet)-game.Harga)
 	}
 
+	newTransaksi := entity.Transaksi{
+		MetodeBayar:  metodeBayar,
+		TglTransaksi: time.Now(),
+		UserID:       userID,
+	}
+
+	db.connection.Debug().Model(&entity.Transaksi{}).Create(&newTransaksi)
+
 	newDetail := entity.DetailUserGame{
 		UserID: userID,
 		GameID: game.ID,
@@ -125,6 +134,16 @@ func (db *userConnection) PurchaseGame(ctx context.Context, gameID uint64, userI
 	db.connection.Debug().Model(&detail).Create(&newDetail)
 
 	db.connection.Model(&user).Association("ListGame").Append(&game)
-
 	return game, nil
+}
+
+func (db *userConnection) TopUp(ctx context.Context, userid uint64, nominal uint64) (entity.User, error) {
+	var user entity.User
+	getUser := db.connection.Debug().Where("id = ?", userid).Take(&user)
+	if getUser.Error != nil {
+		return entity.User{}, errors.New("failed to load user")
+	}
+
+	db.connection.Model(&user).Where(entity.User{ID: userid}).Update("wallet", (user.Wallet)+nominal)
+	return user, nil
 }

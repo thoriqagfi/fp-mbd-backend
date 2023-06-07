@@ -62,6 +62,7 @@ func (sc *storeController) GetAllGames(ctx *gin.Context) {
 	res := utils.BuildResponse("success to get all games", http.StatusOK, gameLists)
 	ctx.JSON(http.StatusOK, res)
 }
+
 func (sc *storeController) GamePage(ctx *gin.Context) {
 	gameid, err := strconv.ParseUint(ctx.Param("id"), 10, 64)
 	if err != nil {

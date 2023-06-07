@@ -25,4 +25,5 @@ type UploadGame struct {
 
 type PurchaseGame struct {
 	MetodeBayar string `json:"metode_bayar"`
+	Nominal     uint64 `json:"nominal"`
 }

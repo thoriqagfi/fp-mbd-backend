@@ -24,6 +24,7 @@ type UserController interface {
 	UploadGame(ctx *gin.Context)
 	PurchaseGame(ctx *gin.Context)
 	ProfilePage(ctx *gin.Context)
+	TopUp(ctx *gin.Context)
 }
 
 func NewUserController(us service.UserService, jwt service.JWTService) UserController {
@@ -169,6 +170,32 @@ func (uc *userController) ProfilePage(ctx *gin.Context) {
 	}
 
 	response := utils.BuildResponse("success to get profile", http.StatusOK, res)
+	ctx.JSON(http.StatusCreated, response)
+}
+
+func (uc *userController) TopUp(ctx *gin.Context) {
+	var topup dto.PurchaseGame
+	if tx := ctx.ShouldBind(&topup); tx != nil {
+		res := utils.BuildErrorResponse("Failed to process request", http.StatusBadRequest)
+		ctx.JSON(http.StatusBadRequest, res)
+		return
+	}
+
+	idUser, err := uc.RetrieveID(ctx)
+	if err != nil {
+		response := utils.BuildErrorResponse("gagal memproses request", http.StatusBadRequest)
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, response)
+		return
+	}
+
+	res, err := uc.userService.TopUp(ctx, idUser, topup.Nominal)
+	if err != nil {
+		res := utils.BuildErrorResponse(err.Error(), http.StatusBadRequest)
+		ctx.JSON(http.StatusBadRequest, res)
+		return
+	}
+
+	response := utils.BuildResponse("success to add steam wallet funds", http.StatusOK, res)
 	ctx.JSON(http.StatusCreated, response)
 }
 
