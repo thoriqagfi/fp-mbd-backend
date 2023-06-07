@@ -17,6 +17,7 @@ type StoreController interface {
 	Featured(ctx *gin.Context)
 	Categories(ctx *gin.Context)
 	GamePage(ctx *gin.Context)
+	GetAllGames(ctx *gin.Context)
 }
 
 func NewStoreController(ss service.StoreService) StoreController {
@@ -49,6 +50,18 @@ func (sc *storeController) Categories(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, res)
 }
 
+func (sc *storeController) GetAllGames(ctx *gin.Context) {
+	pagination := utils.GeneratePaginationFromRequest(ctx)
+	gameLists, err := sc.storeService.AllGame(ctx, pagination)
+	if err != nil {
+		res := utils.BuildErrorResponse(err.Error(), http.StatusBadRequest)
+		ctx.JSON(http.StatusBadRequest, res)
+		return
+	}
+
+	res := utils.BuildResponse("success to get all games", http.StatusOK, gameLists)
+	ctx.JSON(http.StatusOK, res)
+}
 func (sc *storeController) GamePage(ctx *gin.Context) {
 	gameid, err := strconv.ParseUint(ctx.Param("id"), 10, 64)
 	if err != nil {

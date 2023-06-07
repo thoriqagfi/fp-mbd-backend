@@ -5,6 +5,7 @@ import (
 	"errors"
 	"mods/dto"
 	"mods/entity"
+	"mods/utils"
 
 	"gorm.io/gorm"
 )
@@ -17,7 +18,7 @@ type StoreRepository interface {
 	// functional
 	FeaturedInfo(ctx context.Context) ([]dto.StoreFeatured, error)
 	CategoriesInfo(ctx context.Context) ([]dto.StoreCategories, error)
-
+	AllGame(ctx context.Context, pagination utils.Pagination) ([]entity.Game, error)
 	GamePage(ctx context.Context, gameid uint64) (entity.Game, error)
 }
 
@@ -67,6 +68,22 @@ func (r *storeRepository) CategoriesInfo(ctx context.Context) ([]dto.StoreCatego
 	}
 
 	return listCategories, nil
+
+}
+
+func (r *storeRepository) AllGame(ctx context.Context, pagination utils.Pagination) ([]entity.Game, error) {
+	var game entity.Game
+	var listGame []entity.Game
+
+	offset := (pagination.Page - 1) * pagination.Limit
+	queryBuilder := r.db.Limit(pagination.Limit).Offset(offset).Order(pagination.Sort)
+	result := queryBuilder.Model(&entity.Game{}).Where(game).Find(&listGame)
+
+	if result.Error != nil {
+		return nil, errors.New("failed to get all game")
+	}
+
+	return listGame, nil
 
 }
 
