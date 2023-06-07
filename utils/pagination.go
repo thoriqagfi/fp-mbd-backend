@@ -13,7 +13,7 @@ type Pagination struct {
 }
 
 func GeneratePaginationFromRequest(c *gin.Context) Pagination {
-	limit := 2
+	limit := 50
 	page := 1
 	sort := ""
 	query := c.Request.URL.Query()

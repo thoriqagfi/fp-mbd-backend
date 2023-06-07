@@ -147,3 +147,28 @@ func (db *userConnection) TopUp(ctx context.Context, userid uint64, nominal uint
 	db.connection.Model(&user).Where(entity.User{ID: userid}).Update("wallet", (user.Wallet)+nominal)
 	return user, nil
 }
+
+func (db *userConnection) DeveloperProfile(ctx context.Context, devid uint64) (dto.DeveloperReleases, error) {
+	var dev_releases dto.DeveloperReleases
+	var developer entity.User
+	getDev := db.connection.Where("id = ?", devid).Take(&developer)
+	if getDev.Error != nil {
+		return dto.DeveloperReleases{}, errors.New("failed to get developer")
+	}
+
+	var games []entity.Game
+	getGames := db.connection.Where("developer = ?", developer.Name).Find(&games)
+	if getGames.Error != nil {
+		return dto.DeveloperReleases{}, errors.New("failed to get games")
+	}
+
+	for _, game := range games {
+		dev_releases.ListGames = append(dev_releases.ListGames, game)
+		for _, dlc := range game.ListDLC {
+			db.connection.Where("game_id = ?", game.ID).Take(&dlc)
+			dev_releases.ListDLC = append(dev_releases.ListDLC, dlc)
+		}
+	}
+
+	return dev_releases, nil
+}

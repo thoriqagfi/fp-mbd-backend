@@ -1,5 +1,7 @@
 package dto
 
+import "mods/entity"
+
 type UserLoginDTO struct {
 	Email    string `json:"email" binding:"required"`
 	Password string `json:"password" binding:"required"`
@@ -26,4 +28,9 @@ type UploadGame struct {
 type PurchaseGame struct {
 	MetodeBayar string `json:"metode_bayar"`
 	Nominal     uint64 `json:"nominal"`
+}
+
+type DeveloperReleases struct {
+	ListGames []entity.Game
+	ListDLC   []entity.DLC
 }
