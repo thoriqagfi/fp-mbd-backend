@@ -33,6 +33,13 @@ func NewUserController(us service.UserService, jwt service.JWTService) UserContr
 	}
 }
 
+func (uc *userController) RetrieveID(ctx *gin.Context) (uint64, error) {
+	token := ctx.GetHeader("Authorization")
+	token = strings.Replace(token, "Bearer ", "", -1)
+
+	return uc.jwtService.GetUserIDByToken(token)
+}
+
 func (uc *userController) RegisterUser(ctx *gin.Context) {
 	var user dto.UserCreateDTO
 	if tx := ctx.ShouldBind(&user); tx != nil {
@@ -95,11 +102,7 @@ func (uc *userController) UploadGame(ctx *gin.Context) {
 		return
 	}
 
-	token := ctx.GetHeader("Authorization")
-	token = strings.Replace(token, "Bearer ", "", -1)
-	tokenService := service.NewJWTService()
-
-	idUser, err := tokenService.GetUserIDByToken(token)
+	idUser, err := uc.RetrieveID(ctx)
 	if err != nil {
 		response := utils.BuildErrorResponse("gagal memproses request", http.StatusBadRequest)
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, response)
@@ -132,11 +135,7 @@ func (uc *userController) PurchaseGame(ctx *gin.Context) {
 		return
 	}
 
-	token := ctx.GetHeader("Authorization")
-	token = strings.Replace(token, "Bearer ", "", -1)
-	tokenService := service.NewJWTService()
-
-	idUser, err := tokenService.GetUserIDByToken(token)
+	idUser, err := uc.RetrieveID(ctx)
 	if err != nil {
 		response := utils.BuildErrorResponse("gagal memproses request", http.StatusBadRequest)
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, response)
@@ -155,11 +154,7 @@ func (uc *userController) PurchaseGame(ctx *gin.Context) {
 }
 
 func (uc *userController) ProfilePage(ctx *gin.Context) {
-	token := ctx.GetHeader("Authorization")
-	token = strings.Replace(token, "Bearer ", "", -1)
-	tokenService := service.NewJWTService()
-
-	idUser, err := tokenService.GetUserIDByToken(token)
+	idUser, err := uc.RetrieveID(ctx)
 	if err != nil {
 		response := utils.BuildErrorResponse("gagal memproses request", http.StatusBadRequest)
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, response)
