@@ -20,6 +20,7 @@ func Routes(router *gin.Engine, userController controller.UserController, storeC
 	{
 		// role user DAN developer
 		userRoutes.GET("/me", userController.ProfilePage)
+		userRoutes.GET("/medev", userController.DeveloperProfile)
 		userRoutes.POST("/purchase/:id", userController.PurchaseGame)
 		userRoutes.POST("/topup", userController.TopUp)
 
