@@ -114,9 +114,8 @@ func (db *userConnection) PurchaseGame(ctx context.Context, gameID uint64, userI
 		if user.Wallet < game.Harga {
 			return entity.Game{}, errors.New("not enough steam wallet")
 		}
+		db.connection.Model(&user).Where(entity.User{ID: userID}).Update("wallet", (user.Wallet)-game.Harga)
 	}
-
-	db.connection.Model(&user).Where(entity.User{ID: userID}).Update("wallet", (user.Wallet)-game.Harga)
 
 	newDetail := entity.DetailUserGame{
 		UserID: userID,
