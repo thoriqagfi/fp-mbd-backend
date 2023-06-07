@@ -23,6 +23,7 @@ type UserService interface {
 	PurchaseGame(ctx context.Context, gameid uint64, userid uint64, metodeBayar string) (entity.Game, error)
 	UserProfile(ctx context.Context, userid uint64) (entity.User, error)
 	TopUp(ctx context.Context, userid uint64, nominal uint64) (entity.User, error)
+	DeveloperProfile(ctx context.Context, devid uint64) (dto.DeveloperReleases, error)
 }
 
 func NewUserService(ur repository.UserRepository) UserService {
@@ -87,4 +88,8 @@ func (us *userService) UserProfile(ctx context.Context, userid uint64) (entity.U
 
 func (us *userService) TopUp(ctx context.Context, userid uint64, nominal uint64) (entity.User, error) {
 	return us.userRepository.TopUp(ctx, userid, nominal)
+}
+
+func (us *userService) DeveloperProfile(ctx context.Context, devid uint64) (dto.DeveloperReleases, error) {
+	return us.userRepository.DeveloperProfile(ctx, devid)
 }

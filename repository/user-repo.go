@@ -25,6 +25,7 @@ type UserRepository interface {
 	UploadGame(ctx context.Context, gameDTO dto.UploadGame, userid uint64) (entity.Game, error)
 	UserProfile(ctx context.Context, userid uint64) (entity.User, error)
 	TopUp(ctx context.Context, userid uint64, nominal uint64) (entity.User, error)
+	DeveloperProfile(ctx context.Context, devid uint64) (dto.DeveloperReleases, error)
 }
 
 func NewUserRepository(db *gorm.DB) UserRepository {
@@ -170,5 +171,6 @@ func (db *userConnection) DeveloperProfile(ctx context.Context, devid uint64) (d
 		}
 	}
 
+	db.connection.Preload("ListGames").Preload("ListDLC").Take(&dev_releases)
 	return dev_releases, nil
 }
