@@ -14,3 +14,7 @@ type Review struct {
 	UserID uint64 `gorm:"foreignKey" json:"user_id"`
 	User   *User  `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;" json:"user,omitempty"`
 }
+
+func (Review) TableName() string {
+	return "reviews"
+}

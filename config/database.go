@@ -39,6 +39,10 @@ func SetupDatabaseConnection() *gorm.DB {
 		entity.Review{},
 		entity.Transaksi{},
 		entity.Tags{},
+		entity.BahasaAudio{},
+		entity.BahasaInterface{},
+		entity.BahasaSubtitle{},
+		entity.OperatingSystem{},
 	); err != nil {
 		fmt.Println(err)
 		panic(err)

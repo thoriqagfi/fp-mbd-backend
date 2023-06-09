@@ -13,6 +13,7 @@ type User struct {
 	Password      string `json:"password" binding:"required"`
 	Profile_image string `json:"profile_image"`
 	Role          string `json:"role"`
+	Wallet        uint64 `json:"wallet"`
 
 	ListGame      []*Game     `gorm:"many2many:detail_user_game;" json:"list_game,omitempty"`
 	ListDLC       []*DLC      `gorm:"many2many:detail_user_dlc;" json:"list_dlc,omitempty"`

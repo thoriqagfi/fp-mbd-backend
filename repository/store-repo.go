@@ -5,6 +5,7 @@ import (
 	"errors"
 	"mods/dto"
 	"mods/entity"
+	"mods/utils"
 
 	"gorm.io/gorm"
 )
@@ -17,6 +18,9 @@ type StoreRepository interface {
 	// functional
 	FeaturedInfo(ctx context.Context) ([]dto.StoreFeatured, error)
 	CategoriesInfo(ctx context.Context) ([]dto.StoreCategories, error)
+	AllGame(ctx context.Context, pagination utils.Pagination) ([]entity.Game, error)
+	GamePage(ctx context.Context, gameid uint64) (entity.Game, error)
+	DLCGame(ctx context.Context, dlcid uint64) (entity.DLC, error)
 }
 
 func NewStoreRepository(db *gorm.DB) StoreRepository {
@@ -66,4 +70,42 @@ func (r *storeRepository) CategoriesInfo(ctx context.Context) ([]dto.StoreCatego
 
 	return listCategories, nil
 
+}
+
+func (r *storeRepository) AllGame(ctx context.Context, pagination utils.Pagination) ([]entity.Game, error) {
+	var game entity.Game
+	var listGame []entity.Game
+
+	offset := (pagination.Page - 1) * pagination.Limit
+	queryBuilder := r.db.Limit(pagination.Limit).Offset(offset).Order(pagination.Sort)
+	result := queryBuilder.Model(&entity.Game{}).Where(game).Find(&listGame)
+
+	if result.Error != nil {
+		return nil, errors.New("failed to get all game")
+	}
+
+	return listGame, nil
+
+}
+
+func (r *storeRepository) GamePage(ctx context.Context, gameid uint64) (entity.Game, error) {
+	var game entity.Game
+
+	getGame := r.db.Where("id = ?", gameid).Preload("ListDLC").Find(&game) // ambil semua data tag dahulu
+	if getGame.Error != nil {
+		return entity.Game{}, errors.New("failed to get game information")
+	}
+
+	return game, nil
+}
+
+func (r *storeRepository) DLCGame(ctx context.Context, dlcid uint64) (entity.DLC, error) {
+	var dlc entity.DLC
+
+	getDLC := r.db.Where("id = ?", dlcid).Find(&dlc) // ambil semua data tag dahulu
+	if(getDLC.Error != nil){
+		return entity.DLC{}, errors.New("failed to get dlc information")
+	}
+
+	return dlc, nil
 }

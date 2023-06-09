@@ -7,6 +7,7 @@ type DLC struct {
 	Harga      uint64 `json:"harga" binding:"required"`
 	System_min string `json:"system_min" binding:"required"`
 	System_rec string `json:"system_rec" binding:"required"`
+	Picture    string `json:"picture" binding:"required"`
 
 	ListUser      []*User      `gorm:"many2many:detail_user_dlc;" json:"list_user,omitempty"`
 	ListTransaksi []*Transaksi `gorm:"many2many:detail_transaksi_dlc;" json:"list_transaksi,omitempty"`
@@ -15,4 +16,8 @@ type DLC struct {
 
 	GameID uint64 `gorm:"foreignKey" json:"game_id"`
 	Game   *Game  `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;" json:"game,omitempty"`
+}
+
+func (DLC) TableName() string {
+	return "dlc"
 }
