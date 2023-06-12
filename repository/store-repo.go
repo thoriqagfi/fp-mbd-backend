@@ -33,7 +33,7 @@ func NewStoreRepository(db *gorm.DB) StoreRepository {
 func (r *storeRepository) FeaturedInfo(ctx context.Context) ([]dto.StoreFeatured, error) {
 	var listGame []dto.StoreFeatured
 
-	getList := r.db.Model(&entity.Game{}).Limit(5).Find(&listGame)
+	getList := r.db.Model(&entity.Game{}).Limit(5).Order("release_date desc").Find(&listGame)
 
 	if getList.Error != nil {
 		return []dto.StoreFeatured{}, errors.New("failed to get featured information")
