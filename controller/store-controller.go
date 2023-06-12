@@ -127,7 +127,7 @@ func (sc *storeController) FilterTags(ctx *gin.Context) {
 
 	filtered, err := sc.storeService.FilterTags(tag.Nama)
 	if err != nil {
-		res := utils.BuildErrorResponse("failed to get filtered info", http.StatusBadRequest)
+		res := utils.BuildErrorResponse(err.Error(), http.StatusBadRequest)
 		ctx.JSON(http.StatusBadRequest, res)
 		return
 	}

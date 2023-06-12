@@ -133,7 +133,7 @@ func (r *storeRepository) FilterTags(nama string) ([]entity.Game, error) {
 	r.db.Where("nama = ?", nama).Take(&tag)
 
 	var details []entity.DetailTagGame
-	getDetail := r.db.Where("tags_id = ?", tag.ID).Find(&details)
+	getDetail := r.db.Debug().Model(&entity.DetailTagGame{}).Where("tags_id = ?", tag.ID).Find(&details)
 	if getDetail.Error != nil {
 		return []entity.Game{}, errors.New("no games found")
 	}
