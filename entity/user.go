@@ -3,6 +3,7 @@ package entity
 import (
 	"mods/utils"
 
+	"github.com/go-mail/mail"
 	"gorm.io/gorm"
 )
 
@@ -41,22 +42,21 @@ func (u *User) BeforeUpdate(tx *gorm.DB) error {
 	return nil
 }
 
-/*
-	func (u *User) AfterCreate(tx *gorm.DB) error {
-		auth := smtp.PlainAuth("", "steammbd@gmail.com", "UPaSS001", "smtp.gmail.com")
-		to := []string{u.Email}
-		msg := []byte("To: " + u.Name + "\r\n" +
-			"Subject: Welcome To Steam MBD\r\n" +
-			"\r\n" + "Selamat Datang di Website Clone Steam!!!")
+func (u *User) AfterCreate(tx *gorm.DB) error {
+	m := mail.NewMessage()
+	m.SetHeader("From", "steammbd@gmail.com")
+	m.SetHeader("To", u.Email)
+	m.SetHeader("Subject", "Welcome To Steam MBD!")
+	m.SetBody("text/html", "Hello <b>"+u.Name+"</b> Welcome To Our Website and Enjoy!")
 
-		err := smtp.SendMail("smtp.gmail.com:587", auth, "steammbd@gmail.com", to, msg)
+	d := mail.NewDialer("smtp.gmail.com", 587, "steammbd@gmail.com", "UPaSS001")
 
-		if err != nil {
-			return err
-		}
-		return nil
+	if err := d.DialAndSend(m); err != nil {
+		return err
 	}
-*/
+	return nil
+}
+
 func (User) TableName() string {
 	return "users"
 }
