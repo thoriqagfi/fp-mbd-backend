@@ -24,6 +24,8 @@ type UserService interface {
 	UserProfile(ctx context.Context, userid uint64) (entity.User, error)
 	TopUp(ctx context.Context, userid uint64, nominal uint64) (entity.User, error)
 	DeveloperProfile(ctx context.Context, devid uint64) (dto.DeveloperReleases, error)
+	UploadDLC(ctx context.Context, dlc dto.UploadDLC) (entity.DLC, error)
+	PurchaseDLC(ctx context.Context, dlcid uint64, userid uint64, metodeBayar string) (entity.DLC, error)
 }
 
 func NewUserService(ur repository.UserRepository) UserService {
@@ -92,4 +94,12 @@ func (us *userService) TopUp(ctx context.Context, userid uint64, nominal uint64)
 
 func (us *userService) DeveloperProfile(ctx context.Context, devid uint64) (dto.DeveloperReleases, error) {
 	return us.userRepository.DeveloperProfile(ctx, devid)
+}
+
+func (us *userService) UploadDLC(ctx context.Context, dlc dto.UploadDLC) (entity.DLC, error) {
+	return us.userRepository.UploadDLC(ctx, dlc)
+}
+
+func (us *userService) PurchaseDLC(ctx context.Context, dlcid uint64, userid uint64, metodeBayar string) (entity.DLC, error) {
+	return us.userRepository.PurchaseDLC(ctx, dlcid, userid, metodeBayar)
 }

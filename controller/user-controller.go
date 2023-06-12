@@ -26,6 +26,8 @@ type UserController interface {
 	ProfilePage(ctx *gin.Context)
 	TopUp(ctx *gin.Context)
 	DeveloperProfile(ctx *gin.Context)
+	UploadDLC(ctx *gin.Context)
+	PurchaseDLC(ctx *gin.Context)
 }
 
 func NewUserController(us service.UserService, jwt service.JWTService) UserController {
@@ -171,7 +173,7 @@ func (uc *userController) ProfilePage(ctx *gin.Context) {
 	}
 
 	response := utils.BuildResponse("success to get profile", http.StatusOK, res)
-	ctx.JSON(http.StatusCreated, response)
+	ctx.JSON(http.StatusOK, response)
 }
 
 func (uc *userController) TopUp(ctx *gin.Context) {
@@ -216,6 +218,59 @@ func (uc *userController) DeveloperProfile(ctx *gin.Context) {
 	}
 
 	response := utils.BuildResponse("success to get developer profile", http.StatusOK, res)
+	ctx.JSON(http.StatusOK, response)
+}
+
+func (uc *userController) UploadDLC(ctx *gin.Context) {
+	var dlc dto.UploadDLC
+	if tx := ctx.ShouldBind(&dlc); tx != nil {
+		res := utils.BuildErrorResponse("Failed to process request", http.StatusBadRequest)
+		ctx.JSON(http.StatusBadRequest, res)
+		return
+	}
+
+	res, err := uc.userService.UploadDLC(ctx, dlc)
+	if err != nil {
+		res := utils.BuildErrorResponse(err.Error(), http.StatusBadRequest)
+		ctx.JSON(http.StatusBadRequest, res)
+		return
+	}
+
+	response := utils.BuildResponse("success to upload dlc", http.StatusOK, res)
+	ctx.JSON(http.StatusCreated, response)
+
+}
+
+func (uc *userController) PurchaseDLC(ctx *gin.Context) {
+	var transaksi dto.PurchaseGame
+	if tx := ctx.ShouldBind(&transaksi); tx != nil {
+		res := utils.BuildErrorResponse("Failed to process request", http.StatusBadRequest)
+		ctx.JSON(http.StatusBadRequest, res)
+		return
+	}
+
+	dlcid, err := strconv.ParseUint(ctx.Param("id"), 10, 64)
+	if err != nil {
+		response := utils.BuildErrorResponse("gagal memproses request", http.StatusBadRequest)
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, response)
+		return
+	}
+
+	idUser, err := uc.RetrieveID(ctx)
+	if err != nil {
+		response := utils.BuildErrorResponse("gagal memproses request", http.StatusBadRequest)
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, response)
+		return
+	}
+
+	res, err := uc.userService.PurchaseDLC(ctx, dlcid, idUser, transaksi.MetodeBayar)
+	if err != nil {
+		res := utils.BuildErrorResponse(err.Error(), http.StatusBadRequest)
+		ctx.JSON(http.StatusBadRequest, res)
+		return
+	}
+
+	response := utils.BuildResponse("pembelian dlc berhasil", http.StatusOK, res)
 	ctx.JSON(http.StatusCreated, response)
 }
 

@@ -26,6 +26,8 @@ type UserRepository interface {
 	UserProfile(ctx context.Context, userid uint64) (entity.User, error)
 	TopUp(ctx context.Context, userid uint64, nominal uint64) (entity.User, error)
 	DeveloperProfile(ctx context.Context, devid uint64) (dto.DeveloperReleases, error)
+	UploadDLC(ctx context.Context, dlc dto.UploadDLC) (entity.DLC, error)
+	PurchaseDLC(ctx context.Context, dlcid uint64, userid uint64, metodeBayar string) (entity.DLC, error)
 }
 
 func NewUserRepository(db *gorm.DB) UserRepository {
@@ -172,4 +174,68 @@ func (db *userConnection) DeveloperProfile(ctx context.Context, devid uint64) (d
 
 	db.connection.Preload("ListGames").Preload("ListDLC").Take(&dev_releases)
 	return dev_releases, nil
+}
+
+func (db *userConnection) UploadDLC(ctx context.Context, dlc dto.UploadDLC) (entity.DLC, error) {
+
+	newDLC := entity.DLC{
+		Nama:       dlc.Nama,
+		Deskripsi:  dlc.Deskripsi,
+		Harga:      dlc.Harga,
+		System_min: dlc.System_min,
+		System_rec: dlc.System_rec,
+		Picture:    dlc.Picture,
+		GameID:     dlc.GameID,
+	}
+
+	if err := db.connection.Create(&newDLC).Error; err != nil {
+		return entity.DLC{}, errors.New("failed to upload DLC")
+	}
+
+	return newDLC, nil
+}
+
+func (db *userConnection) PurchaseDLC(ctx context.Context, dlcid uint64, userid uint64, metodeBayar string) (entity.DLC, error) {
+	var user entity.User
+	getUser := db.connection.Where("id = ?", userid).Take(&user)
+	if getUser.Error != nil {
+		return entity.DLC{}, errors.New("invalid user")
+	}
+
+	var dlc entity.DLC
+	getGame := db.connection.Where("id = ?", dlcid).Take(&dlc)
+	if getGame.Error != nil {
+		return entity.DLC{}, errors.New("dlc not found")
+	}
+
+	var detail entity.DetailUserDLC
+	getDetail := db.connection.Debug().Where("user_id = ? AND dlc_id = ?", userid, dlcid).Take(&detail)
+	if getDetail.Error == nil {
+		return entity.DLC{}, errors.New("dlc already exist in library")
+	}
+
+	if metodeBayar == "Steam Wallet" {
+		if user.Wallet < dlc.Harga {
+			return entity.DLC{}, errors.New("not enough steam wallet")
+		}
+		db.connection.Model(&user).Where(entity.User{ID: userid}).Update("wallet", (user.Wallet)-dlc.Harga)
+	}
+
+	newTransaksi := entity.Transaksi{
+		MetodeBayar:  metodeBayar,
+		TglTransaksi: time.Now(),
+		UserID:       userid,
+	}
+
+	db.connection.Debug().Model(&entity.Transaksi{}).Create(&newTransaksi)
+
+	newDetail := entity.DetailUserDLC{
+		UserID: userid,
+		DLCID:  dlc.ID,
+	}
+
+	db.connection.Debug().Model(&detail).Create(&newDetail)
+
+	db.connection.Model(&user).Association("ListDLC").Append(&dlc)
+	return dlc, nil
 }
