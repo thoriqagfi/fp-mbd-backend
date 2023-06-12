@@ -20,12 +20,23 @@ type UserRepository interface {
 	GetUserByID(ctx context.Context, userID uint64) (entity.User, error)
 	GetUserByEmail(ctx context.Context, email string) (entity.User, error)
 
-	// after login
+	// profiles
+	UserProfile(ctx context.Context, userid uint64) (entity.User, error)
+	DeveloperProfile(ctx context.Context, devid uint64) (dto.DeveloperReleases, error)
+
+	// Transactional
 	PurchaseGame(ctx context.Context, gameID uint64, userID uint64, metodeBayar string) (entity.Game, error)
 	UploadGame(ctx context.Context, gameDTO dto.UploadGame, userid uint64) (entity.Game, error)
-	UserProfile(ctx context.Context, userid uint64) (entity.User, error)
+	UploadDLC(ctx context.Context, dlc dto.UploadDLC) (entity.DLC, error)
+	PurchaseDLC(ctx context.Context, dlcid uint64, userid uint64, metodeBayar string) (entity.DLC, error)
 	TopUp(ctx context.Context, userid uint64, nominal uint64) (entity.User, error)
-	DeveloperProfile(ctx context.Context, devid uint64) (dto.DeveloperReleases, error)
+
+	// Add Tags Languages OS
+	AddTags(tagID uint64, gameID uint64) (entity.Tags, error)
+	AddBA(baID uint64, gameID uint64) (entity.BahasaAudio, error)
+	AddBI(biID uint64, gameID uint64)
+	AddBS(bsID uint64, gameID uint64)
+	AddOS(osID uint64, gameID uint64) (entity.OperatingSystem, error)
 }
 
 func NewUserRepository(db *gorm.DB) UserRepository {
@@ -172,4 +183,166 @@ func (db *userConnection) DeveloperProfile(ctx context.Context, devid uint64) (d
 
 	db.connection.Preload("ListGames").Preload("ListDLC").Take(&dev_releases)
 	return dev_releases, nil
+}
+
+func (db *userConnection) UploadDLC(ctx context.Context, dlc dto.UploadDLC) (entity.DLC, error) {
+
+	newDLC := entity.DLC{
+		Nama:       dlc.Nama,
+		Deskripsi:  dlc.Deskripsi,
+		Harga:      dlc.Harga,
+		System_min: dlc.System_min,
+		System_rec: dlc.System_rec,
+		Picture:    dlc.Picture,
+		GameID:     dlc.GameID,
+	}
+
+	if err := db.connection.Create(&newDLC).Error; err != nil {
+		return entity.DLC{}, errors.New("failed to upload DLC")
+	}
+
+	return newDLC, nil
+}
+
+func (db *userConnection) PurchaseDLC(ctx context.Context, dlcid uint64, userid uint64, metodeBayar string) (entity.DLC, error) {
+	var user entity.User
+	getUser := db.connection.Where("id = ?", userid).Take(&user)
+	if getUser.Error != nil {
+		return entity.DLC{}, errors.New("invalid user")
+	}
+
+	var dlc entity.DLC
+	getGame := db.connection.Where("id = ?", dlcid).Take(&dlc)
+	if getGame.Error != nil {
+		return entity.DLC{}, errors.New("dlc not found")
+	}
+
+	var detail entity.DetailUserDLC
+	getDetail := db.connection.Debug().Where("user_id = ? AND dlc_id = ?", userid, dlcid).Take(&detail)
+	if getDetail.Error == nil {
+		return entity.DLC{}, errors.New("dlc already exist in library")
+	}
+
+	if metodeBayar == "Steam Wallet" {
+		if user.Wallet < dlc.Harga {
+			return entity.DLC{}, errors.New("not enough steam wallet")
+		}
+		db.connection.Model(&user).Where(entity.User{ID: userid}).Update("wallet", (user.Wallet)-dlc.Harga)
+	}
+
+	newTransaksi := entity.Transaksi{
+		MetodeBayar:  metodeBayar,
+		TglTransaksi: time.Now(),
+		UserID:       userid,
+	}
+
+	db.connection.Debug().Model(&entity.Transaksi{}).Create(&newTransaksi)
+
+	newDetail := entity.DetailUserDLC{
+		UserID: userid,
+		DLCID:  dlc.ID,
+	}
+
+	db.connection.Debug().Model(&detail).Create(&newDetail)
+
+	db.connection.Model(&user).Association("ListDLC").Append(&dlc)
+	return dlc, nil
+}
+
+func (db *userConnection) AddTags(tagID uint64, gameID uint64) (entity.Tags, error) {
+	var game entity.Game
+	var tag entity.Tags
+	var detail entity.DetailTagGame
+
+	if err := db.connection.Where("tags_id = ? AND game_id = ?", tagID, gameID).Take(&detail).Error; err == nil {
+		return entity.Tags{}, errors.New("selected tag already exist")
+	}
+
+	db.connection.Where("id = ?", gameID).Take(&game)
+	db.connection.Where("id = ?", tagID).Take(&tag)
+
+	newDetail := entity.DetailTagGame{
+		TagID:  tag.ID,
+		GameID: game.ID,
+	}
+	db.connection.Debug().Model(&detail).Create(&newDetail)
+
+	db.connection.Model(&game).Association("ListTag").Append(&tag)
+	return tag, nil
+
+}
+
+func (db *userConnection) AddBA(baID uint64, gameID uint64) (entity.BahasaAudio, error) {
+	var detail entity.DetailGameBA
+	var game entity.Game
+	var ba entity.BahasaAudio
+
+	if err := db.connection.Debug().Where("game_id = ? AND bahasa_audio_id = ?", gameID, baID).Take(&detail).Error; err == nil {
+		return entity.BahasaAudio{}, errors.New("selected bahasa already exist")
+	}
+	db.connection.Where("id = ?", gameID).Take(&game)
+	db.connection.Where("id = ?", baID).Take(&ba)
+
+	newDetail := entity.DetailGameBA{
+		GameID: game.ID,
+		BaID:   ba.ID,
+	}
+	db.connection.Debug().Model(&detail).Create(&newDetail)
+
+	db.connection.Model(&game).Association("ListBA").Append(&ba)
+	return ba, nil
+}
+
+func (db *userConnection) AddBI(biID uint64, gameID uint64) {
+	var game entity.Game
+	var bi entity.BahasaInterface
+
+	db.connection.Where("id = ?", gameID).Take(&game)
+	db.connection.Where("id = ?", biID).Take(&bi)
+
+	newDetail := entity.DetailGameBI{
+		GameID: game.ID,
+		BiID:   bi.ID,
+	}
+	db.connection.Debug().Model(&entity.DetailGameBI{}).Create(&newDetail)
+
+	db.connection.Model(&game).Association("ListBI").Append(&bi)
+
+}
+
+func (db *userConnection) AddBS(bsID uint64, gameID uint64) {
+	var game entity.Game
+	var bs entity.BahasaSubtitle
+
+	db.connection.Where("id = ?", gameID).Take(&game)
+	db.connection.Where("id = ?", bsID).Take(&bs)
+
+	newDetail := entity.DetailGameBS{
+		GameID: game.ID,
+		BsID:   bs.ID,
+	}
+	db.connection.Debug().Model(&entity.DetailGameBS{}).Create(&newDetail)
+
+	db.connection.Model(&game).Association("ListBS").Append(&bs)
+}
+
+func (db *userConnection) AddOS(osID uint64, gameID uint64) (entity.OperatingSystem, error) {
+	var detail entity.DetailGameOS
+	var game entity.Game
+	var os entity.OperatingSystem
+
+	if err := db.connection.Where("game_id = ? AND operating_system_id = ?", gameID, osID).Take(&detail).Error; err == nil {
+		return entity.OperatingSystem{}, errors.New("selected os already exist")
+	}
+	db.connection.Where("id = ?", gameID).Take(&game)
+	db.connection.Where("id = ?", osID).Take(&os)
+
+	newDetail := entity.DetailGameOS{
+		GameID: game.ID,
+		OsID:   os.ID,
+	}
+	db.connection.Debug().Model(&detail).Create(&newDetail)
+
+	db.connection.Model(&game).Association("ListOS").Append(&os)
+	return os, nil
 }

@@ -18,14 +18,21 @@ func Routes(router *gin.Engine, userController controller.UserController, storeC
 
 	userRoutes := router.Group("/secured/user").Use(middleware.Authenticate())
 	{
-		// role user DAN developer
+		// profiles
 		userRoutes.GET("/me", userController.ProfilePage)
 		userRoutes.GET("/medev", userController.DeveloperProfile)
+
+		// transactional
 		userRoutes.POST("/purchase/:id", userController.PurchaseGame)
 		userRoutes.POST("/topup", userController.TopUp)
+		userRoutes.POST("/purchasedlc/:id", userController.PurchaseDLC)
 
-		// role developer only
+		// upload new game or dlc
 		userRoutes.POST("/upload", userController.UploadGame)
+		userRoutes.POST("/updlc", userController.UploadDLC)
+
+		// add tags, language, os
+		userRoutes.POST("/add/:method", userController.AddToGame)
 
 	}
 
@@ -37,6 +44,7 @@ func Routes(router *gin.Engine, userController controller.UserController, storeC
 		storeMainPage.GET("/game/:id", storeController.GamePage)
 		storeMainPage.GET("/game/all", storeController.GetAllGames)
 		storeMainPage.GET("/dlc/:id", storeController.DLCGame)
+		storeMainPage.GET("/popular", storeController.Popular)
 	}
 
 }

@@ -21,6 +21,7 @@ type StoreRepository interface {
 	AllGame(ctx context.Context, pagination utils.Pagination) ([]entity.Game, error)
 	GamePage(ctx context.Context, gameid uint64) (entity.Game, error)
 	DLCGame(ctx context.Context, dlcid uint64) (entity.DLC, error)
+	Popular(ctx context.Context) ([]entity.Game, error)
 }
 
 func NewStoreRepository(db *gorm.DB) StoreRepository {
@@ -91,7 +92,7 @@ func (r *storeRepository) AllGame(ctx context.Context, pagination utils.Paginati
 func (r *storeRepository) GamePage(ctx context.Context, gameid uint64) (entity.Game, error) {
 	var game entity.Game
 
-	getGame := r.db.Where("id = ?", gameid).Preload("ListDLC").Find(&game) // ambil semua data tag dahulu
+	getGame := r.db.Where("id = ?", gameid).Preload("ListDLC").Preload("ListBA").Preload("ListBS").Preload("ListBI").Preload("ListOS").Preload("ListTag").Find(&game) // ambil semua data tag dahulu
 	if getGame.Error != nil {
 		return entity.Game{}, errors.New("failed to get game information")
 	}
@@ -103,9 +104,25 @@ func (r *storeRepository) DLCGame(ctx context.Context, dlcid uint64) (entity.DLC
 	var dlc entity.DLC
 
 	getDLC := r.db.Where("id = ?", dlcid).Find(&dlc) // ambil semua data tag dahulu
-	if(getDLC.Error != nil){
+	if getDLC.Error != nil {
 		return entity.DLC{}, errors.New("failed to get dlc information")
 	}
 
 	return dlc, nil
+}
+
+func (r *storeRepository) Popular(ctx context.Context) ([]entity.Game, error) {
+	var games []entity.DetailUserGame
+
+	r.db.Debug().Model(&entity.DetailUserGame{}).Select("game_id, count(user_id)").Group("game_id").Order("count(user_id) desc").Limit(10).Find(&games)
+
+	var getGames []entity.Game
+	for _, game := range games {
+		var findByID entity.Game
+		r.db.Where("id = ?", game.GameID).Take(&findByID)
+		getGames = append(getGames, findByID)
+	}
+
+	return getGames, nil
+
 }

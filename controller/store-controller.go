@@ -19,6 +19,7 @@ type StoreController interface {
 	GamePage(ctx *gin.Context)
 	GetAllGames(ctx *gin.Context)
 	DLCGame(ctx *gin.Context)
+	Popular(ctx *gin.Context)
 }
 
 func NewStoreController(ss service.StoreService) StoreController {
@@ -99,5 +100,17 @@ func (sc *storeController) DLCGame(ctx *gin.Context) {
 	}
 
 	res := utils.BuildResponse("success to get game info", http.StatusOK, dlcInfo)
+	ctx.JSON(http.StatusOK, res)
+}
+
+func (sc *storeController) Popular(ctx *gin.Context) {
+	popularInfo, err := sc.storeService.Popular(ctx)
+	if err != nil {
+		res := utils.BuildErrorResponse("failed to get popular info", http.StatusBadRequest)
+		ctx.JSON(http.StatusBadRequest, res)
+		return
+	}
+
+	res := utils.BuildResponse("success to get popular info", http.StatusOK, popularInfo)
 	ctx.JSON(http.StatusOK, res)
 }
