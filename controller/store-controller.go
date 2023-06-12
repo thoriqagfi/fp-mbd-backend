@@ -19,6 +19,7 @@ type StoreController interface {
 	GamePage(ctx *gin.Context)
 	GetAllGames(ctx *gin.Context)
 	DLCGame(ctx *gin.Context)
+	Popular(ctx *gin.Context)
 }
 
 func NewStoreController(ss service.StoreService) StoreController {
