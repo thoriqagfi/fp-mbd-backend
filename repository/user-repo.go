@@ -32,11 +32,11 @@ type UserRepository interface {
 	TopUp(ctx context.Context, userid uint64, nominal uint64) (entity.User, error)
 
 	// Add Tags Languages OS
-	AddTags(tagID uint64, gameID uint64) (entity.Tags, error)
-	AddBA(baID uint64, gameID uint64) (entity.BahasaAudio, error)
-	AddBI(biID uint64, gameID uint64)
-	AddBS(bsID uint64, gameID uint64)
-	AddOS(osID uint64, gameID uint64) (entity.OperatingSystem, error)
+	AddTags(nama string, gameID uint64) (entity.Tags, error)
+	AddBA(nama string, gameID uint64) (entity.BahasaAudio, error)
+	AddBI(nama string, gameID uint64)
+	AddBS(nama string, gameID uint64)
+	AddOS(nama string, gameID uint64) (entity.OperatingSystem, error)
 }
 
 func NewUserRepository(db *gorm.DB) UserRepository {
@@ -249,17 +249,18 @@ func (db *userConnection) PurchaseDLC(ctx context.Context, dlcid uint64, userid 
 	return dlc, nil
 }
 
-func (db *userConnection) AddTags(tagID uint64, gameID uint64) (entity.Tags, error) {
+func (db *userConnection) AddTags(nama string, gameID uint64) (entity.Tags, error) {
 	var game entity.Game
 	var tag entity.Tags
 	var detail entity.DetailTagGame
 
-	if err := db.connection.Where("tags_id = ? AND game_id = ?", tagID, gameID).Take(&detail).Error; err == nil {
+	db.connection.Where("nama = ?", nama).Take(&tag)
+
+	if err := db.connection.Where("tags_id = ? AND game_id = ?", tag.ID, gameID).Take(&detail).Error; err == nil {
 		return entity.Tags{}, errors.New("selected tag already exist")
 	}
 
 	db.connection.Where("id = ?", gameID).Take(&game)
-	db.connection.Where("id = ?", tagID).Take(&tag)
 
 	newDetail := entity.DetailTagGame{
 		TagID:  tag.ID,
@@ -272,16 +273,17 @@ func (db *userConnection) AddTags(tagID uint64, gameID uint64) (entity.Tags, err
 
 }
 
-func (db *userConnection) AddBA(baID uint64, gameID uint64) (entity.BahasaAudio, error) {
+func (db *userConnection) AddBA(nama string, gameID uint64) (entity.BahasaAudio, error) {
 	var detail entity.DetailGameBA
 	var game entity.Game
 	var ba entity.BahasaAudio
 
-	if err := db.connection.Debug().Where("game_id = ? AND bahasa_audio_id = ?", gameID, baID).Take(&detail).Error; err == nil {
+	db.connection.Where("nama = ?", nama).Take(&ba)
+
+	if err := db.connection.Debug().Where("game_id = ? AND bahasa_audio_id = ?", gameID, ba.ID).Take(&detail).Error; err == nil {
 		return entity.BahasaAudio{}, errors.New("selected bahasa already exist")
 	}
 	db.connection.Where("id = ?", gameID).Take(&game)
-	db.connection.Where("id = ?", baID).Take(&ba)
 
 	newDetail := entity.DetailGameBA{
 		GameID: game.ID,
@@ -293,12 +295,12 @@ func (db *userConnection) AddBA(baID uint64, gameID uint64) (entity.BahasaAudio,
 	return ba, nil
 }
 
-func (db *userConnection) AddBI(biID uint64, gameID uint64) {
+func (db *userConnection) AddBI(nama string, gameID uint64) {
 	var game entity.Game
 	var bi entity.BahasaInterface
 
 	db.connection.Where("id = ?", gameID).Take(&game)
-	db.connection.Where("id = ?", biID).Take(&bi)
+	db.connection.Where("nama = ?", nama).Take(&bi)
 
 	newDetail := entity.DetailGameBI{
 		GameID: game.ID,
@@ -310,12 +312,12 @@ func (db *userConnection) AddBI(biID uint64, gameID uint64) {
 
 }
 
-func (db *userConnection) AddBS(bsID uint64, gameID uint64) {
+func (db *userConnection) AddBS(nama string, gameID uint64) {
 	var game entity.Game
 	var bs entity.BahasaSubtitle
 
 	db.connection.Where("id = ?", gameID).Take(&game)
-	db.connection.Where("id = ?", bsID).Take(&bs)
+	db.connection.Where("nama = ?", nama).Take(&bs)
 
 	newDetail := entity.DetailGameBS{
 		GameID: game.ID,
@@ -326,16 +328,17 @@ func (db *userConnection) AddBS(bsID uint64, gameID uint64) {
 	db.connection.Model(&game).Association("ListBS").Append(&bs)
 }
 
-func (db *userConnection) AddOS(osID uint64, gameID uint64) (entity.OperatingSystem, error) {
+func (db *userConnection) AddOS(nama string, gameID uint64) (entity.OperatingSystem, error) {
 	var detail entity.DetailGameOS
 	var game entity.Game
 	var os entity.OperatingSystem
 
-	if err := db.connection.Where("game_id = ? AND operating_system_id = ?", gameID, osID).Take(&detail).Error; err == nil {
+	db.connection.Where("nama = ?", nama).Take(&os)
+
+	if err := db.connection.Where("game_id = ? AND operating_system_id = ?", gameID, os.ID).Take(&detail).Error; err == nil {
 		return entity.OperatingSystem{}, errors.New("selected os already exist")
 	}
 	db.connection.Where("id = ?", gameID).Take(&game)
-	db.connection.Where("id = ?", osID).Take(&os)
 
 	newDetail := entity.DetailGameOS{
 		GameID: game.ID,
