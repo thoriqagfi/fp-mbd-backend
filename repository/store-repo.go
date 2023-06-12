@@ -91,7 +91,7 @@ func (r *storeRepository) AllGame(ctx context.Context, pagination utils.Paginati
 func (r *storeRepository) GamePage(ctx context.Context, gameid uint64) (entity.Game, error) {
 	var game entity.Game
 
-	getGame := r.db.Where("id = ?", gameid).Preload("ListDLC").Find(&game) // ambil semua data tag dahulu
+	getGame := r.db.Where("id = ?", gameid).Preload("ListDLC").Preload("ListBA").Preload("ListBS").Preload("ListBI").Preload("ListOS").Preload("ListTag").Find(&game) // ambil semua data tag dahulu
 	if getGame.Error != nil {
 		return entity.Game{}, errors.New("failed to get game information")
 	}
@@ -103,7 +103,7 @@ func (r *storeRepository) DLCGame(ctx context.Context, dlcid uint64) (entity.DLC
 	var dlc entity.DLC
 
 	getDLC := r.db.Where("id = ?", dlcid).Find(&dlc) // ambil semua data tag dahulu
-	if(getDLC.Error != nil){
+	if getDLC.Error != nil {
 		return entity.DLC{}, errors.New("failed to get dlc information")
 	}
 
