@@ -22,6 +22,7 @@ type StoreRepository interface {
 	GamePage(ctx context.Context, gameid uint64) (entity.Game, error)
 	DLCGame(ctx context.Context, dlcid uint64) (entity.DLC, error)
 	Popular(ctx context.Context) ([]entity.Game, error)
+	FilterTags(nama string) ([]entity.Game, error)
 }
 
 func NewStoreRepository(db *gorm.DB) StoreRepository {
@@ -124,5 +125,27 @@ func (r *storeRepository) Popular(ctx context.Context) ([]entity.Game, error) {
 	}
 
 	return getGames, nil
+
+}
+
+func (r *storeRepository) FilterTags(nama string) ([]entity.Game, error) {
+	var tag entity.Tags
+	r.db.Where("nama = ?", nama).Take(&tag)
+
+	var details []entity.DetailTagGame
+	getDetail := r.db.Where("tags_id = ?", tag.ID).Find(&details)
+	if getDetail.Error != nil {
+		return []entity.Game{}, errors.New("no games found")
+	}
+
+	var games []entity.Game
+	var game entity.Game
+
+	for _, detail := range details {
+		r.db.Where("game_id = ?", detail.GameID).Take(&game)
+		games = append(games, game)
+	}
+
+	return games, nil
 
 }

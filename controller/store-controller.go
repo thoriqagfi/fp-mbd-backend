@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"mods/dto"
 	"mods/service"
 	"mods/utils"
 	"net/http"
@@ -20,6 +21,7 @@ type StoreController interface {
 	GetAllGames(ctx *gin.Context)
 	DLCGame(ctx *gin.Context)
 	Popular(ctx *gin.Context)
+	FilterTags(ctx *gin.Context)
 }
 
 func NewStoreController(ss service.StoreService) StoreController {
@@ -112,5 +114,24 @@ func (sc *storeController) Popular(ctx *gin.Context) {
 	}
 
 	res := utils.BuildResponse("success to get popular info", http.StatusOK, popularInfo)
+	ctx.JSON(http.StatusOK, res)
+}
+
+func (sc *storeController) FilterTags(ctx *gin.Context) {
+	var tag dto.GetTags
+	if tx := ctx.ShouldBind(&tag); tx != nil {
+		res := utils.BuildErrorResponse("Failed to process request", http.StatusBadRequest)
+		ctx.JSON(http.StatusBadRequest, res)
+		return
+	}
+
+	filtered, err := sc.storeService.FilterTags(tag.Nama)
+	if err != nil {
+		res := utils.BuildErrorResponse("failed to get filtered info", http.StatusBadRequest)
+		ctx.JSON(http.StatusBadRequest, res)
+		return
+	}
+
+	res := utils.BuildResponse("success to get filtered info", http.StatusOK, filtered)
 	ctx.JSON(http.StatusOK, res)
 }
