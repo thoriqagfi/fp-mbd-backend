@@ -23,7 +23,7 @@ func Routes(router *gin.Engine, userController controller.UserController, storeC
 		userRoutes.GET("/medev", userController.DeveloperProfile)
 		userRoutes.POST("/purchase/:id", userController.PurchaseGame)
 		userRoutes.POST("/topup", userController.TopUp)
-		userRoutes.POST("/purchasedlc", userController.PurchaseDLC)
+		userRoutes.POST("/purchasedlc/:id", userController.PurchaseDLC)
 
 		// role developer only
 		userRoutes.POST("/upload", userController.UploadGame)
