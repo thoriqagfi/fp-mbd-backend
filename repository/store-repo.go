@@ -142,7 +142,7 @@ func (r *storeRepository) FilterTags(nama string) ([]entity.Game, error) {
 	var game entity.Game
 
 	for _, detail := range details {
-		r.db.Where("game_id = ?", detail.GameID).Take(&game)
+		r.db.Where("id = ?", detail.GameID).Take(&game)
 		games = append(games, game)
 	}
 
