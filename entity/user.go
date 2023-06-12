@@ -3,7 +3,6 @@ package entity
 import (
 	"mods/utils"
 
-	"github.com/go-mail/mail"
 	"gorm.io/gorm"
 )
 
@@ -42,6 +41,7 @@ func (u *User) BeforeUpdate(tx *gorm.DB) error {
 	return nil
 }
 
+/*
 func (u *User) AfterCreate(tx *gorm.DB) error {
 	m := mail.NewMessage()
 	m.SetHeader("From", "steammbd@gmail.com")
@@ -56,6 +56,7 @@ func (u *User) AfterCreate(tx *gorm.DB) error {
 	}
 	return nil
 }
+*/
 
 func (User) TableName() string {
 	return "users"
