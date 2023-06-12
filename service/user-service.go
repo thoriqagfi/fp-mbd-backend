@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"errors"
 	"mods/dto"
 	"mods/entity"
 	"mods/repository"
@@ -13,17 +14,25 @@ type userService struct {
 }
 
 type UserService interface {
+	// functional
 	CreateUser(ctx context.Context, userDTO dto.UserCreateDTO) (entity.User, error)
 	IsDuplicateEmail(ctx context.Context, email string) (bool, error)
 	VerifyCredential(ctx context.Context, email string, password string) (bool, error)
 	GetUserByEmail(ctx context.Context, email string) (entity.User, error)
+
+	// profiles
+	UserProfile(ctx context.Context, userid uint64) (entity.User, error)
+	DeveloperProfile(ctx context.Context, devid uint64) (dto.DeveloperReleases, error)
+
+	// Transactional
 	UploadGame(ctx context.Context, gameDTO dto.UploadGame, userid uint64) (entity.Game, error)
 	PurchaseGame(ctx context.Context, gameid uint64, userid uint64, metodeBayar string) (entity.Game, error)
-	UserProfile(ctx context.Context, userid uint64) (entity.User, error)
 	TopUp(ctx context.Context, userid uint64, nominal uint64) (entity.User, error)
-	DeveloperProfile(ctx context.Context, devid uint64) (dto.DeveloperReleases, error)
 	UploadDLC(ctx context.Context, dlc dto.UploadDLC) (entity.DLC, error)
 	PurchaseDLC(ctx context.Context, dlcid uint64, userid uint64, metodeBayar string) (entity.DLC, error)
+
+	// Add Tags Languages OS
+	AddToGame(id uint64, gameID uint64, method string) (any, error)
 }
 
 func NewUserService(ur repository.UserRepository) UserService {
@@ -105,4 +114,19 @@ func (us *userService) UploadDLC(ctx context.Context, dlc dto.UploadDLC) (entity
 
 func (us *userService) PurchaseDLC(ctx context.Context, dlcid uint64, userid uint64, metodeBayar string) (entity.DLC, error) {
 	return us.userRepository.PurchaseDLC(ctx, dlcid, userid, metodeBayar)
+}
+
+func (us *userService) AddToGame(id uint64, gameID uint64, method string) (any, error) {
+	switch method {
+	case "tags":
+		return us.userRepository.AddTags(id, gameID)
+	case "ba":
+		return us.userRepository.AddBA(id, gameID)
+	case "bi":
+		return us.userRepository.AddBI(id, gameID)
+	case "bs":
+		return us.userRepository.AddBS(id, gameID)
+	default:
+		return nil, errors.New("invalid method")
+	}
 }

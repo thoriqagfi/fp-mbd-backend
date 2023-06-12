@@ -37,10 +37,15 @@ type UploadDLC struct {
 
 type PurchaseGame struct {
 	MetodeBayar string `json:"metode_bayar"`
-	Nominal     uint64 `json:"nominal"`
+	Nominal     string `json:"nominal"`
 }
 
 type DeveloperReleases struct {
 	ListGames []entity.Game
 	ListDLC   []entity.DLC
+}
+
+type Add struct {
+	ID     uint64 `json:"id" binding:"required"`
+	GameID uint64 `json:"game_id" binding:"required"`
 }

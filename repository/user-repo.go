@@ -20,14 +20,23 @@ type UserRepository interface {
 	GetUserByID(ctx context.Context, userID uint64) (entity.User, error)
 	GetUserByEmail(ctx context.Context, email string) (entity.User, error)
 
-	// after login
+	// profiles
+	UserProfile(ctx context.Context, userid uint64) (entity.User, error)
+	DeveloperProfile(ctx context.Context, devid uint64) (dto.DeveloperReleases, error)
+
+	// Transactional
 	PurchaseGame(ctx context.Context, gameID uint64, userID uint64, metodeBayar string) (entity.Game, error)
 	UploadGame(ctx context.Context, gameDTO dto.UploadGame, userid uint64) (entity.Game, error)
-	UserProfile(ctx context.Context, userid uint64) (entity.User, error)
-	TopUp(ctx context.Context, userid uint64, nominal uint64) (entity.User, error)
-	DeveloperProfile(ctx context.Context, devid uint64) (dto.DeveloperReleases, error)
 	UploadDLC(ctx context.Context, dlc dto.UploadDLC) (entity.DLC, error)
 	PurchaseDLC(ctx context.Context, dlcid uint64, userid uint64, metodeBayar string) (entity.DLC, error)
+	TopUp(ctx context.Context, userid uint64, nominal uint64) (entity.User, error)
+
+	// Add Tags Languages OS
+	AddTags(tagID uint64, gameID uint64) (entity.Tags, error)
+	AddBA(baID uint64, gameID uint64) (entity.BahasaAudio, error)
+	AddBI(biID uint64, gameID uint64) (entity.BahasaInterface, error)
+	AddBS(bsID uint64, gameID uint64) (entity.BahasaSubtitle, error)
+	AddOS(osID uint64, gameID uint64) (entity.OperatingSystem, error)
 }
 
 func NewUserRepository(db *gorm.DB) UserRepository {
@@ -238,4 +247,111 @@ func (db *userConnection) PurchaseDLC(ctx context.Context, dlcid uint64, userid 
 
 	db.connection.Model(&user).Association("ListDLC").Append(&dlc)
 	return dlc, nil
+}
+
+func (db *userConnection) AddTags(tagID uint64, gameID uint64) (entity.Tags, error) {
+	var game entity.Game
+	var tag entity.Tags
+	var detail entity.DetailTagGame
+
+	if err := db.connection.Where("tag_id = ? AND game_id = ?", tagID, gameID).Take(&detail).Error; err == nil {
+		return entity.Tags{}, errors.New("selected tag already exist")
+	}
+
+	db.connection.Where("id = ?", gameID).Take(&game)
+	db.connection.Where("id = ?", tagID).Take(&tag)
+
+	newDetail := entity.DetailTagGame{
+		TagID:  tag.ID,
+		GameID: game.ID,
+	}
+	db.connection.Debug().Model(&detail).Create(&newDetail)
+
+	db.connection.Model(&game).Association("ListTag").Append(&tag)
+	return tag, nil
+
+}
+
+func (db *userConnection) AddBA(baID uint64, gameID uint64) (entity.BahasaAudio, error) {
+	var detail entity.DetailGameBA
+	var game entity.Game
+	var ba entity.BahasaAudio
+
+	if err := db.connection.Where("game_id = ? AND ba_id = ?", gameID, baID).Take(&detail).Error; err == nil {
+		return entity.BahasaAudio{}, errors.New("selected bahasa already exist")
+	}
+	db.connection.Where("id = ?", gameID).Take(&game)
+	db.connection.Where("id = ?", baID).Take(&ba)
+
+	newDetail := entity.DetailGameBA{
+		GameID: game.ID,
+		BaID:   ba.ID,
+	}
+	db.connection.Debug().Model(&detail).Create(&newDetail)
+
+	db.connection.Model(&game).Association("ListBA").Append(&ba)
+	return ba, nil
+}
+
+func (db *userConnection) AddBI(biID uint64, gameID uint64) (entity.BahasaInterface, error) {
+	var detail entity.DetailGameBI
+	var game entity.Game
+	var bi entity.BahasaInterface
+
+	if err := db.connection.Where("game_id = ? AND bi_id = ?", gameID, biID).Take(&detail).Error; err == nil {
+		return entity.BahasaInterface{}, errors.New("selected bahasa already exist")
+	}
+	db.connection.Where("id = ?", gameID).Take(&game)
+	db.connection.Where("id = ?", biID).Take(&bi)
+
+	newDetail := entity.DetailGameBI{
+		GameID: game.ID,
+		BiID:   bi.ID,
+	}
+	db.connection.Debug().Model(&detail).Create(&newDetail)
+
+	db.connection.Model(&game).Association("ListBI").Append(&bi)
+	return bi, nil
+}
+
+func (db *userConnection) AddBS(bsID uint64, gameID uint64) (entity.BahasaSubtitle, error) {
+	var detail entity.DetailGameBS
+	var game entity.Game
+	var bs entity.BahasaSubtitle
+
+	if err := db.connection.Where("game_id = ? AND bs_id = ?", gameID, bsID).Take(&detail).Error; err == nil {
+		return entity.BahasaSubtitle{}, errors.New("selected bahasa already exist")
+	}
+	db.connection.Where("id = ?", gameID).Take(&game)
+	db.connection.Where("id = ?", bsID).Take(&bs)
+
+	newDetail := entity.DetailGameBS{
+		GameID: game.ID,
+		BsID:   bs.ID,
+	}
+	db.connection.Debug().Model(&detail).Create(&newDetail)
+
+	db.connection.Model(&game).Association("ListBS").Append(&bs)
+	return bs, nil
+}
+
+func (db *userConnection) AddOS(osID uint64, gameID uint64) (entity.OperatingSystem, error) {
+	var detail entity.DetailGameOS
+	var game entity.Game
+	var os entity.OperatingSystem
+
+	if err := db.connection.Where("game_id = ? AND os_id = ?", gameID, osID).Take(&detail).Error; err == nil {
+		return entity.OperatingSystem{}, errors.New("selected os already exist")
+	}
+	db.connection.Where("id = ?", gameID).Take(&game)
+	db.connection.Where("id = ?", osID).Take(&os)
+
+	newDetail := entity.DetailGameOS{
+		GameID: game.ID,
+		OsID:   os.ID,
+	}
+	db.connection.Debug().Model(&detail).Create(&newDetail)
+
+	db.connection.Model(&game).Association("ListOS").Append(&os)
+	return os, nil
 }

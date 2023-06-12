@@ -7,7 +7,6 @@ require (
 	github.com/golang-jwt/jwt/v4 v4.5.0
 	github.com/jackc/pgx/v5 v5.3.0 // indirect
 	github.com/joho/godotenv v1.5.1
-	github.com/mashingan/smapping v0.1.19
 	golang.org/x/crypto v0.6.0
 	gorm.io/driver/postgres v1.4.8
 	gorm.io/gorm v1.24.5
