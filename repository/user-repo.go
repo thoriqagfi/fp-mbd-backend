@@ -34,8 +34,8 @@ type UserRepository interface {
 	// Add Tags Languages OS
 	AddTags(tagID uint64, gameID uint64) (entity.Tags, error)
 	AddBA(baID uint64, gameID uint64) (entity.BahasaAudio, error)
-	AddBI(biID uint64, gameID uint64) (entity.BahasaInterface, error)
-	AddBS(bsID uint64, gameID uint64) (entity.BahasaSubtitle, error)
+	AddBI(biID uint64, gameID uint64)
+	AddBS(bsID uint64, gameID uint64)
 	AddOS(osID uint64, gameID uint64) (entity.OperatingSystem, error)
 }
 
@@ -293,14 +293,10 @@ func (db *userConnection) AddBA(baID uint64, gameID uint64) (entity.BahasaAudio,
 	return ba, nil
 }
 
-func (db *userConnection) AddBI(biID uint64, gameID uint64) (entity.BahasaInterface, error) {
-	var detail entity.DetailGameBI
+func (db *userConnection) AddBI(biID uint64, gameID uint64) {
 	var game entity.Game
 	var bi entity.BahasaInterface
 
-	if err := db.connection.Where("game_id = ? AND bi_id = ?", gameID, biID).Take(&detail).Error; err == nil {
-		return entity.BahasaInterface{}, errors.New("selected bahasa already exist")
-	}
 	db.connection.Where("id = ?", gameID).Take(&game)
 	db.connection.Where("id = ?", biID).Take(&bi)
 
@@ -308,20 +304,16 @@ func (db *userConnection) AddBI(biID uint64, gameID uint64) (entity.BahasaInterf
 		GameID: game.ID,
 		BiID:   bi.ID,
 	}
-	db.connection.Debug().Model(&detail).Create(&newDetail)
+	db.connection.Debug().Model(&entity.DetailGameBI{}).Create(&newDetail)
 
 	db.connection.Model(&game).Association("ListBI").Append(&bi)
-	return bi, nil
+
 }
 
-func (db *userConnection) AddBS(bsID uint64, gameID uint64) (entity.BahasaSubtitle, error) {
-	var detail entity.DetailGameBS
+func (db *userConnection) AddBS(bsID uint64, gameID uint64) {
 	var game entity.Game
 	var bs entity.BahasaSubtitle
 
-	if err := db.connection.Where("game_id = ? AND bs_id = ?", gameID, bsID).Take(&detail).Error; err == nil {
-		return entity.BahasaSubtitle{}, errors.New("selected bahasa already exist")
-	}
 	db.connection.Where("id = ?", gameID).Take(&game)
 	db.connection.Where("id = ?", bsID).Take(&bs)
 
@@ -329,10 +321,9 @@ func (db *userConnection) AddBS(bsID uint64, gameID uint64) (entity.BahasaSubtit
 		GameID: game.ID,
 		BsID:   bs.ID,
 	}
-	db.connection.Debug().Model(&detail).Create(&newDetail)
+	db.connection.Debug().Model(&entity.DetailGameBS{}).Create(&newDetail)
 
 	db.connection.Model(&game).Association("ListBS").Append(&bs)
-	return bs, nil
 }
 
 func (db *userConnection) AddOS(osID uint64, gameID uint64) (entity.OperatingSystem, error) {

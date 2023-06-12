@@ -120,12 +120,16 @@ func (us *userService) AddToGame(id uint64, gameID uint64, method string) (any, 
 	switch method {
 	case "tags":
 		return us.userRepository.AddTags(id, gameID)
-	case "ba":
-		return us.userRepository.AddBA(id, gameID)
-	case "bi":
-		return us.userRepository.AddBI(id, gameID)
-	case "bs":
-		return us.userRepository.AddBS(id, gameID)
+	case "language":
+		cek, err := us.userRepository.AddBA(id, gameID)
+		if err != nil {
+			return nil, err
+		}
+		us.userRepository.AddBI(id, gameID)
+		us.userRepository.AddBS(id, gameID)
+		return cek, nil
+	case "os":
+		return us.userRepository.AddOS(id, gameID)
 	default:
 		return nil, errors.New("invalid method")
 	}
