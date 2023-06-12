@@ -6,8 +6,6 @@ import (
 	"mods/entity"
 	"mods/repository"
 	"mods/utils"
-
-	"github.com/mashingan/smapping"
 )
 
 type userService struct {
@@ -35,11 +33,16 @@ func NewUserService(ur repository.UserRepository) UserService {
 }
 
 func (us *userService) CreateUser(ctx context.Context, userDTO dto.UserCreateDTO) (entity.User, error) {
-	var user entity.User
-	if err := smapping.FillStruct(&user, smapping.MapFields(&userDTO)); err != nil {
-		return user, err
+	newUser := entity.User{
+		Name:          userDTO.Name,
+		Email:         userDTO.Role,
+		Password:      userDTO.Password,
+		Profile_image: "https://drive.google.com/uc?export=view&id=1GV5u8MnB88S3Hf92-JLnfpHx6kBaOoBU",
+		Role:          userDTO.Role,
+		Wallet:        0,
 	}
-	return us.userRepository.InsertUser(ctx, user)
+
+	return us.userRepository.InsertUser(ctx, newUser)
 }
 
 func (us *userService) IsDuplicateEmail(ctx context.Context, email string) (bool, error) {
