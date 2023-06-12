@@ -35,7 +35,7 @@ func NewUserService(ur repository.UserRepository) UserService {
 func (us *userService) CreateUser(ctx context.Context, userDTO dto.UserCreateDTO) (entity.User, error) {
 	newUser := entity.User{
 		Name:          userDTO.Name,
-		Email:         userDTO.Role,
+		Email:         userDTO.Email,
 		Password:      userDTO.Password,
 		Profile_image: "https://drive.google.com/uc?export=view&id=1GV5u8MnB88S3Hf92-JLnfpHx6kBaOoBU",
 		Role:          userDTO.Role,
