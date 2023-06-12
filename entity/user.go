@@ -2,6 +2,7 @@ package entity
 
 import (
 	"mods/utils"
+	"net/smtp"
 
 	"gorm.io/gorm"
 )
@@ -35,6 +36,21 @@ func (u *User) BeforeUpdate(tx *gorm.DB) error {
 	if u.Password != "" {
 		u.Password, err = utils.PasswordHash(u.Password)
 	}
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (u *User) AfterCreate(tx *gorm.DB) error {
+	auth := smtp.PlainAuth("", "steammbd@gmail.com", "UPaSS001", "smtp.gmail.com")
+	to := []string{u.Email}
+	msg := []byte("To: " + u.Name + "\r\n" +
+		"Subject: Welcome To Steam MBD\r\n" +
+		"\r\n" + "Selamat Datang di Website Clone Steam!!!")
+
+	err := smtp.SendMail("smtp.gmail.com:587", auth, "steammbd@gmail.com", to, msg)
+
 	if err != nil {
 		return err
 	}
