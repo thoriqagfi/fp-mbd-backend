@@ -112,7 +112,7 @@ func (r *storeRepository) DLCGame(ctx context.Context, dlcid uint64) (entity.DLC
 }
 
 func (r *storeRepository) Popular(ctx context.Context) ([]entity.Game, error) {
-	var games []dto.StorePopular
+	var games []entity.DetailUserGame
 
 	r.db.Debug().Model(&entity.DetailUserGame{}).Select("game_id, count(user_id) as count_user").Group("game_id").Find(&games)
 	r.db.Debug().Order("count_user").Find(&games)
