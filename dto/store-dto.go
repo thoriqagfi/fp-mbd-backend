@@ -13,3 +13,8 @@ type StoreCategories struct {
 	Nama    string `json:"tag_name" binding:"required"`
 	Picture string `json:"game_picture" binding:"required"`
 }
+
+type StorePopular struct {
+	GameID    uint64 `json:"game_id"`
+	CountUser uint64 `json:"count_user"`
+}

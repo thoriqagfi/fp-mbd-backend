@@ -21,6 +21,7 @@ type StoreRepository interface {
 	AllGame(ctx context.Context, pagination utils.Pagination) ([]entity.Game, error)
 	GamePage(ctx context.Context, gameid uint64) (entity.Game, error)
 	DLCGame(ctx context.Context, dlcid uint64) (entity.DLC, error)
+	Popular(ctx context.Context) ([]entity.Game, error)
 }
 
 func NewStoreRepository(db *gorm.DB) StoreRepository {
@@ -108,4 +109,22 @@ func (r *storeRepository) DLCGame(ctx context.Context, dlcid uint64) (entity.DLC
 	}
 
 	return dlc, nil
+}
+
+func (r *storeRepository) Popular(ctx context.Context) ([]entity.Game, error) {
+	var games []dto.StorePopular
+
+	r.db.Debug().Model(&entity.DetailUserGame{}).Select("game_id, count(user_id) as count_user").Group("game_id").Find(&games)
+	r.db.Debug().Order("count_user").Find(&games)
+	r.db.Limit(10).Find(&games)
+
+	var getGames []entity.Game
+	for _, game := range games {
+		var findByID entity.Game
+		r.db.Where("id = ?", game.GameID).Take(&findByID)
+		getGames = append(getGames, findByID)
+	}
+
+	return getGames, nil
+
 }
