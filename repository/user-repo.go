@@ -277,7 +277,7 @@ func (db *userConnection) AddBA(baID uint64, gameID uint64) (entity.BahasaAudio,
 	var game entity.Game
 	var ba entity.BahasaAudio
 
-	if err := db.connection.Where("game_id = ? AND bahasa_audio_id = ?", gameID, baID).Take(&detail).Error; err == nil {
+	if err := db.connection.Debug().Where("game_id = ? AND bahasa_audio_id = ?", gameID, baID).Take(&detail).Error; err == nil {
 		return entity.BahasaAudio{}, errors.New("selected bahasa already exist")
 	}
 	db.connection.Where("id = ?", gameID).Take(&game)
