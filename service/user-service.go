@@ -125,11 +125,11 @@ func (us *userService) AddToGame(nama string, gameID uint64, method string) (any
 		if err != nil {
 			return nil, err
 		}
-		us.userRepository.AddBI(id, gameID)
-		us.userRepository.AddBS(id, gameID)
+		us.userRepository.AddBI(nama, gameID)
+		us.userRepository.AddBS(nama, gameID)
 		return cek, nil
 	case "os":
-		return us.userRepository.AddOS(id, gameID)
+		return us.userRepository.AddOS(nama, gameID)
 	default:
 		return nil, errors.New("invalid method")
 	}
