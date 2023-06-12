@@ -254,7 +254,7 @@ func (db *userConnection) AddTags(tagID uint64, gameID uint64) (entity.Tags, err
 	var tag entity.Tags
 	var detail entity.DetailTagGame
 
-	if err := db.connection.Where("tag_id = ? AND game_id = ?", tagID, gameID).Take(&detail).Error; err == nil {
+	if err := db.connection.Where("tags_id = ? AND game_id = ?", tagID, gameID).Take(&detail).Error; err == nil {
 		return entity.Tags{}, errors.New("selected tag already exist")
 	}
 
@@ -277,7 +277,7 @@ func (db *userConnection) AddBA(baID uint64, gameID uint64) (entity.BahasaAudio,
 	var game entity.Game
 	var ba entity.BahasaAudio
 
-	if err := db.connection.Where("game_id = ? AND ba_id = ?", gameID, baID).Take(&detail).Error; err == nil {
+	if err := db.connection.Where("game_id = ? AND bahasa_audio_id = ?", gameID, baID).Take(&detail).Error; err == nil {
 		return entity.BahasaAudio{}, errors.New("selected bahasa already exist")
 	}
 	db.connection.Where("id = ?", gameID).Take(&game)
@@ -331,7 +331,7 @@ func (db *userConnection) AddOS(osID uint64, gameID uint64) (entity.OperatingSys
 	var game entity.Game
 	var os entity.OperatingSystem
 
-	if err := db.connection.Where("game_id = ? AND os_id = ?", gameID, osID).Take(&detail).Error; err == nil {
+	if err := db.connection.Where("game_id = ? AND operating_system_id = ?", gameID, osID).Take(&detail).Error; err == nil {
 		return entity.OperatingSystem{}, errors.New("selected os already exist")
 	}
 	db.connection.Where("id = ?", gameID).Take(&game)
