@@ -45,7 +45,7 @@ func Routes(router *gin.Engine, userController controller.UserController, storeC
 		storeMainPage.GET("/game/all", storeController.GetAllGames)
 		storeMainPage.GET("/dlc/:id", storeController.DLCGame)
 		storeMainPage.GET("/popular", storeController.Popular)
-		storeMainPage.POST("/:filter", storeController.FilterTags)
+		storeMainPage.GET("/:filter", storeController.FilterTags)
 	}
 
 }
