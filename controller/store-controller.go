@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"mods/dto"
 	"mods/service"
 	"mods/utils"
 	"net/http"
@@ -118,14 +117,9 @@ func (sc *storeController) Popular(ctx *gin.Context) {
 }
 
 func (sc *storeController) FilterTags(ctx *gin.Context) {
-	var tag dto.GetTags
-	if tx := ctx.ShouldBind(&tag); tx != nil {
-		res := utils.BuildErrorResponse("Failed to process request", http.StatusBadRequest)
-		ctx.JSON(http.StatusBadRequest, res)
-		return
-	}
+	chosenTag := ctx.Param("filter")
 
-	filtered, err := sc.storeService.FilterTags(tag.Nama)
+	filtered, err := sc.storeService.FilterTags(chosenTag)
 	if err != nil {
 		res := utils.BuildErrorResponse(err.Error(), http.StatusBadRequest)
 		ctx.JSON(http.StatusBadRequest, res)
