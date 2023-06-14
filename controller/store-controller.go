@@ -20,6 +20,7 @@ type StoreController interface {
 	GetAllGames(ctx *gin.Context)
 	DLCGame(ctx *gin.Context)
 	Popular(ctx *gin.Context)
+	FilterTags(ctx *gin.Context)
 }
 
 func NewStoreController(ss service.StoreService) StoreController {
@@ -112,5 +113,19 @@ func (sc *storeController) Popular(ctx *gin.Context) {
 	}
 
 	res := utils.BuildResponse("success to get popular info", http.StatusOK, popularInfo)
+	ctx.JSON(http.StatusOK, res)
+}
+
+func (sc *storeController) FilterTags(ctx *gin.Context) {
+	chosenTag := ctx.Param("filter")
+
+	filtered, err := sc.storeService.FilterTags(chosenTag)
+	if err != nil {
+		res := utils.BuildErrorResponse(err.Error(), http.StatusBadRequest)
+		ctx.JSON(http.StatusBadRequest, res)
+		return
+	}
+
+	res := utils.BuildResponse("success to get filtered info", http.StatusOK, filtered)
 	ctx.JSON(http.StatusOK, res)
 }

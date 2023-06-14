@@ -19,6 +19,7 @@ type StoreService interface {
 	AllGame(ctx context.Context, pagination utils.Pagination) ([]entity.Game, error)
 	DLCGame(ctx context.Context, dlcid uint64) (entity.DLC, error)
 	Popular(ctx context.Context) ([]entity.Game, error)
+	FilterTags(nama string) ([]entity.Game, error)
 }
 
 func NewStoreService(sr repository.StoreRepository) StoreService {
@@ -59,4 +60,8 @@ func (ss *storeService) DLCGame(ctx context.Context, dlcid uint64) (entity.DLC, 
 
 func (ss *storeService) Popular(ctx context.Context) ([]entity.Game, error) {
 	return ss.storeRepository.Popular(ctx)
+}
+
+func (ss *storeService) FilterTags(nama string) ([]entity.Game, error) {
+	return ss.storeRepository.FilterTags(nama)
 }

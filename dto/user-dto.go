@@ -46,6 +46,6 @@ type DeveloperReleases struct {
 }
 
 type Add struct {
-	ID     uint64 `json:"id" binding:"required"`
+	Nama   string `json:"nama" binding:"required"`
 	GameID uint64 `json:"game_id" binding:"required"`
 }

@@ -32,7 +32,7 @@ type UserService interface {
 	PurchaseDLC(ctx context.Context, dlcid uint64, userid uint64, metodeBayar string) (entity.DLC, error)
 
 	// Add Tags Languages OS
-	AddToGame(id uint64, gameID uint64, method string) (any, error)
+	AddToGame(nama string, gameID uint64, method string) (any, error)
 }
 
 func NewUserService(ur repository.UserRepository) UserService {
@@ -116,20 +116,20 @@ func (us *userService) PurchaseDLC(ctx context.Context, dlcid uint64, userid uin
 	return us.userRepository.PurchaseDLC(ctx, dlcid, userid, metodeBayar)
 }
 
-func (us *userService) AddToGame(id uint64, gameID uint64, method string) (any, error) {
+func (us *userService) AddToGame(nama string, gameID uint64, method string) (any, error) {
 	switch method {
 	case "tags":
-		return us.userRepository.AddTags(id, gameID)
+		return us.userRepository.AddTags(nama, gameID)
 	case "language":
-		cek, err := us.userRepository.AddBA(id, gameID)
+		cek, err := us.userRepository.AddBA(nama, gameID)
 		if err != nil {
 			return nil, err
 		}
-		us.userRepository.AddBI(id, gameID)
-		us.userRepository.AddBS(id, gameID)
+		us.userRepository.AddBI(nama, gameID)
+		us.userRepository.AddBS(nama, gameID)
 		return cek, nil
 	case "os":
-		return us.userRepository.AddOS(id, gameID)
+		return us.userRepository.AddOS(nama, gameID)
 	default:
 		return nil, errors.New("invalid method")
 	}

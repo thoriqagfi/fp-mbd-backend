@@ -292,7 +292,7 @@ func (uc *userController) AddToGame(ctx *gin.Context) {
 		return
 	}
 
-	res, err := uc.userService.AddToGame(add.ID, add.GameID, chosen)
+	res, err := uc.userService.AddToGame(add.Nama, add.GameID, chosen)
 	if err != nil {
 		res := utils.BuildErrorResponse(err.Error(), http.StatusBadRequest)
 		ctx.JSON(http.StatusBadRequest, res)
